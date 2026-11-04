@@ -255,20 +255,20 @@
     </div>
     <script>
     let tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
-    tg.setHeaderColor('#f2f4f7');
+tg.ready();
+tg.expand();
+tg.setHeaderColor('#f2f4f7');
 
-    // Получаем имя
-    let userName = tg.initDataUnsafe?.user?.first_name;
-    if (userName) {
-        document.getElementById('user-name').innerText = userName;
-    } else {
-        document.getElementById('user-name').innerText = "Гость";
-    }
+// Получаем имя
+let userName = tg.initDataUnsafe?.user?.first_name;
+if (userName) {
+    document.getElementById('user-name').innerText = userName;
+} else {
+    document.getElementById('user-name').innerText = "Гость";
+}
 
-    // Баллы
-    document.getElementById('user-balance').innerText = "150";
+// Баллы
+document.getElementById('user-balance').innerText = "150";
 </script>
 </body>
 </html>
