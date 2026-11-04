@@ -256,15 +256,18 @@
     <script>
     let tg = window.Telegram.WebApp;
     tg.ready();
-    tg.showAlert("Имя из Telegram: " + (tg.initDataUnsafe?.user?.first_name || "НЕ НАЙДЕНО"));
     tg.expand();
     tg.setHeaderColor('#f2f4f7');
 
-    // Получаем имя пользователя прямо из Telegram!
-    let userName = tg.initDataUnsafe?.user?.first_name || "Сосед";
-    document.getElementById('user-name').innerText = userName;
-    
-    // Имитируем загрузку баллов (пока 150)
+    // Получаем имя
+    let userName = tg.initDataUnsafe?.user?.first_name;
+    if (userName) {
+        document.getElementById('user-name').innerText = userName;
+    } else {
+        document.getElementById('user-name').innerText = "Гость";
+    }
+
+    // Баллы
     document.getElementById('user-balance').innerText = "150";
 </script>
 </body>
