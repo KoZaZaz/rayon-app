@@ -256,6 +256,7 @@
     <script>
     let tg = window.Telegram.WebApp;
     tg.ready();
+    tg.showAlert("Имя из Telegram: " + (tg.initDataUnsafe?.user?.first_name || "НЕ НАЙДЕНО"));
     tg.expand();
     tg.setHeaderColor('#f2f4f7');
 
