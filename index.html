@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RAYON - Мой район</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <style>
+        /* Подключаем красивый шрифт с иконками */
+        @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0');
+
+        :root {
+            --text-main: #1c1c1e;
+            --text-muted: #8e8e93;
+            --bg-glass: rgba(255, 255, 255, 0.65);
+            --border-glass: rgba(255, 255, 255, 0.4);
+            --accent: #5856d6;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background-color: #f2f4f7; color: var(--text-main);
+            margin: 0; padding: 16px; padding-bottom: 100px;
+            min-height: 100vh; position: relative; overflow-x: hidden;
+        }
+
+        .material-symbols-rounded {
+            font-family: 'Material Symbols Rounded';
+            font-weight: normal; font-style: normal;
+            font-size: 24px; line-height: 1; letter-spacing: normal;
+            text-transform: none; display: inline-block; white-space: nowrap;
+            word-wrap: normal; direction: ltr; -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased; user-select: none;
+        }
+
+        /* Цветные пятна на фоне */
+        .bg-blob-1, .bg-blob-2, .bg-blob-3 {
+            position: fixed; border-radius: 50%; filter: blur(50px); z-index: -1; opacity: 0.6;
+        }
+        .bg-blob-1 { top: -50px; left: -50px; width: 250px; height: 250px; background: #ff9a9e; animation: float 10s infinite alternate; }
+        .bg-blob-2 { top: 30%; right: -50px; width: 200px; height: 200px; background: #a18cd1; animation: float 8s infinite alternate-reverse; }
+        .bg-blob-3 { bottom: 10%; left: 10%; width: 300px; height: 300px; background: #84fab0; animation: float 12s infinite alternate; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(20px, 20px) scale(1.1); }
+        }
+
+        /* Стеклянная шапка */
+        .top-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 24px; background: var(--bg-glass);
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            padding: 12px 16px; border-radius: 20px;
+            border: 1px solid var(--border-glass); box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+        }
+
+        .user-info { display: flex; align-items: center; gap: 12px; }
+        .avatar {
+            width: 46px; height: 46px;
+            background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
+            border-radius: 14px; display: flex; align-items: center; justify-content: center;
+            font-size: 20px; font-weight: bold; color: white; box-shadow: 0 4px 12px rgba(255, 117, 140, 0.4);
+        }
+        .greeting { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+        .name { font-size: 18px; font-weight: 700; }
+        
+        .bell-icon {
+            background: white; width: 42px; height: 42px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer; color: var(--text-main);
+        }
+
+        /* Карточка баллов */
+        .balance-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 24px; padding: 24px; color: white; margin-bottom: 24px;
+            box-shadow: 0 12px 24px rgba(118, 75, 162, 0.3); position: relative; overflow: hidden;
+        }.balance-card::before { content: ''; position: absolute; top: -50px; right: -30px; width: 150px; height: 150px; background: rgba(255,255,255,0.15); border-radius: 50%; }
+        .balance-card::after { content: ''; position: absolute; bottom: -40px; left: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; }
+        
+        .balance-title { font-size: 14px; opacity: 0.9; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+        .balance-amount { font-size: 40px; font-weight: 800; margin: 8px 0 16px 0; letter-spacing: -1px; display: flex; align-items: center; gap: 8px;}
+        
+        .level-info { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+        .progress-bar-bg { background: rgba(255,255,255,0.25); height: 10px; border-radius: 5px; overflow: hidden; }
+        .progress-bar-fill { background: #fff; width: 65%; height: 100%; border-radius: 5px; }
+
+        /* Сетка действий */
+        .section-title { font-size: 20px; font-weight: 800; margin-bottom: 16px; margin-top: 28px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .section-title span { font-size: 14px; color: var(--accent); font-weight: 600; cursor: pointer; }
+
+        .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        
+        .action-card {
+            background: var(--bg-glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass); border-radius: 20px; padding: 16px;
+            display: flex; flex-direction: column; gap: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.02);
+            cursor: pointer; transition: transform 0.15s ease, background 0.2s;
+        }
+        .action-card:active { transform: scale(0.95); background: rgba(255,255,255,0.8); }
+        
+        .action-icon {
+            width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;
+            border-radius: 16px;
+        }
+        
+        .icon-map { background: #e5f0ff; color: #007aff; }
+        .icon-cam { background: #ffebee; color: #ff3b30; }
+        .icon-help { background: #fff3cd; color: #ff9500; }
+        .icon-gift { background: #e8f5e9; color: #34c759; }
+
+        .action-text { font-weight: 700; font-size: 15px; }
+
+        /* Лента */
+        .feed-card {
+            background: var(--bg-glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass); border-radius: 20px; padding: 16px; margin-bottom: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.02); display: flex; gap: 14px; cursor: pointer;
+        }
+        .feed-icon {
+            width: 44px; height: 44px; min-width: 44px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .feed-content { flex-grow: 1; }
+        .feed-text { font-size: 14px; line-height: 1.45; margin-bottom: 8px; color: #2c2c2e; }
+        .feed-time { font-size: 12px; color: var(--text-muted); font-weight: 500; display: flex; align-items: center; gap: 8px; }
+        
+        .badge { padding: 4px 8px; border-radius: 8px; font-size: 11px; font-weight: 700; }
+        .badge-work { background: #fff3cd; color: #d97706; }
+        .badge-done { background: #d1fae5; color: #059669; }
+
+        /* Нижнее меню */
+        .bottom-nav-wrapper { position: fixed; bottom: 20px; left: 16px; right: 16px; z-index: 100; }
+        .bottom-nav {
+            background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glass); display: flex; justify-content: space-around;
+            padding: 12px 8px; border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+        .nav-item {
+            text-align: center; font-size: 11px; font-weight: 600; color: var(--text-muted);cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: 0.2s;
+        }
+        .nav-item span.material-symbols-rounded { transition: 0.2s; opacity: 0.6; }
+        .nav-item.active { color: var(--accent); }
+        .nav-item.active span.material-symbols-rounded { transform: translateY(-2px) scale(1.1); opacity: 1; color: var(--accent); }
+    </style>
+</head>
+<body>
+
+    <div class="bg-blob-1"></div>
+    <div class="bg-blob-2"></div>
+    <div class="bg-blob-3"></div>
+
+    <div class="top-header">
+        <div class="user-info">
+            <div class="avatar">К</div>
+            <div>
+                <div class="greeting">Добрый день,</div>
+                <div class="name">Катя</div>
+            </div>
+        </div>
+        <div class="bell-icon" onclick="tg.showAlert('У вас 2 новых уведомления!')">
+            <span class="material-symbols-rounded" style="font-size: 22px;">notifications</span>
+        </div>
+    </div>
+
+    <div class="balance-card">
+        <div class="balance-title">
+            <span class="material-symbols-rounded" style="font-size: 18px;">auto_awesome</span>
+            Твои баллы за заботу о районе
+        </div>
+        <div class="balance-amount">150 <span class="material-symbols-rounded" style="font-size: 36px; color: #ffd700;">star</span></div>
+        <div class="level-info">
+            <span>Уровень: Активист</span>
+            <span>650 / 1000</span>
+        </div>
+        <div class="progress-bar-bg">
+            <div class="progress-bar-fill"></div>
+        </div>
+    </div>
+
+    <div class="section-title">Быстрые действия</div>
+    <div class="actions-grid">
+        <div class="action-card" onclick="tg.showAlert('Здесь откроется карта!')">
+            <div class="action-icon icon-map"><span class="material-symbols-rounded">map</span></div>
+            <div class="action-text">Карта района</div>
+        </div>
+        <div class="action-card" onclick="tg.showAlert('Форма отправки!')">
+            <div class="action-icon icon-cam"><span class="material-symbols-rounded">photo_camera</span></div>
+            <div class="action-text">Сообщить о проблеме</div>
+        </div>
+        <div class="action-card" onclick="tg.showAlert('Список соседей!')">
+            <div class="action-icon icon-help"><span class="material-symbols-rounded">group</span></div>
+            <div class="action-text">Помощь соседям</div>
+        </div>
+        <div class="action-card" onclick="tg.showAlert('Магазин скидок!')">
+            <div class="action-icon icon-gift"><span class="material-symbols-rounded">redeem</span></div>
+            <div class="action-text">Тратить баллы</div>
+        </div>
+    </div>
+
+    <div class="section-title">Лента района <span>Все</span></div>
+    
+    <div class="feed-card">
+        <div class="feed-icon" style="background:#e5f0ff; color:#007aff;"><span class="material-symbols-rounded">campaign</span></div>
+        <div class="feed-content">
+            <div class="feed-text"><b>Совет дома:</b> В эту субботу в 10:00 состоится субботник. Выходим чистить двор! За участие дадим по 100 баллов.</div>
+            <div class="feed-time">Сегодня, 09:41</div>
+        </div>
+    </div>
+
+    <div class="feed-card">
+        <div class="feed-icon" style="background:#ffebee; color:#ff3b30;"><span class="material-symbols-rounded">build</span></div>
+        <div class="feed-content">
+            <div class="feed-text"><b>Проблема:</b> Яма у 3-го подъезда.</div>
+            <div class="feed-time">
+                <span>Вчера, 18:20</span>
+                <span class="badge badge-done">✓ Решено</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="feed-card">
+        <div class="feed-icon" style="background:#fff3cd; color:#ff9500;"><span class="material-symbols-rounded">pets</span></div>
+        <div class="feed-content">
+            <div class="feed-text"><b>Найдено:</b> Рыжий кот на площадке. Ищет хозяина или добрые руки.</div><div class="feed-time">
+                <span>Вчера, 14:05</span>
+                <span class="badge badge-work">Ищет дом</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-nav-wrapper">
+        <div class="bottom-nav">
+            <div class="nav-item active">
+                <span class="material-symbols-rounded">home</span>
+                Главная
+            </div>
+            <div class="nav-item" onclick="tg.showAlert('Карта появится позже!')">
+                <span class="material-symbols-rounded">location_on</span>
+                Карта
+            </div>
+            <div class="nav-item" onclick="tg.showAlert('Раздел чатов!')">
+                <span class="material-symbols-rounded">chat</span>
+                Чаты
+            </div>
+            <div class="nav-item" onclick="tg.showAlert('Твой профиль!')">
+                <span class="material-symbols-rounded">person</span>
+                Профиль
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+        tg.setHeaderColor('#f2f4f7');
+    </script>
+</body>
+</html>
