@@ -159,7 +159,7 @@
             <div class="avatar">К</div>
             <div>
                 <div class="greeting">Добрый день,</div>
-                <div class="name">Катя</div>
+                <div class="name" id="user-name">Загрузка...</div>
             </div>
         </div>
         <div class="bell-icon" onclick="tg.showAlert('У вас 2 новых уведомления!')">
@@ -172,7 +172,7 @@
             <span class="material-symbols-rounded" style="font-size: 18px;">auto_awesome</span>
             Твои баллы за заботу о районе
         </div>
-        <div class="balance-amount">150 <span class="material-symbols-rounded" style="font-size: 36px; color: #ffd700;">star</span></div>
+        <div class="balance-amount"><span id="user-balance">0</span> <span class="material-symbols-rounded" style="font-size: 36px; color: #ffd700;">star</span></div>
         <div class="level-info">
             <span>Уровень: Активист</span>
             <span>650 / 1000</span>
@@ -253,12 +253,18 @@
             </div>
         </div>
     </div>
-
     <script>
-        let tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
-        tg.setHeaderColor('#f2f4f7');
-    </script>
+    let tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+    tg.setHeaderColor('#f2f4f7');
+
+    // Получаем имя пользователя прямо из Telegram!
+    let userName = tg.initDataUnsafe?.user?.first_name || "Сосед";
+    document.getElementById('user-name').innerText = userName;
+    
+    // Имитируем загрузку баллов (пока 150)
+    document.getElementById('user-balance').innerText = "150";
+</script>
 </body>
 </html>
