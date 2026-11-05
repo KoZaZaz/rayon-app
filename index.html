@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RAYON - Мой район</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Подключаем Яндекс.Карты -->
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0');
@@ -81,77 +83,90 @@
         .nav-item span.material-symbols-rounded { transition: 0.2s; opacity: 0.6; }
         .nav-item.active { color: var(--accent); }
         .nav-item.active span.material-symbols-rounded { transform: translateY(-2px) scale(1.1); opacity: 1; color: var(--accent); }
+        
+        /* Карта */.map-container { display: none; height: 75vh; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.1); position: relative; }
+        .back-btn { position: absolute; top: 16px; left: 16px; background: white; padding: 8px 16px; border-radius: 20px; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.2); cursor: pointer; z-index: 10; }
     </style>
 </head>
 <body>
 
-    <div class="bg-blob-1"></div><div class="bg-blob-2"></div>
+    <div class="bg-blob-1"></div>
+    <div class="bg-blob-2"></div>
     <div class="bg-blob-3"></div>
 
-    <div class="top-header">
-        <div class="user-info">
-            <div class="avatar" id="user-avatar"></div>
-            <div>
-                <div class="greeting">Добрый день,</div>
-                <div class="name" id="user-name">Загрузка...</div>
+    <!-- ГЛАВНЫЙ ЭКРАН -->
+    <div id="main-screen">
+        <div class="top-header">
+            <div class="user-info">
+                <div class="avatar" id="user-avatar"></div>
+                <div>
+                    <div class="greeting">Добрый день,</div>
+                    <div class="name" id="user-name">Загрузка...</div>
+                </div>
+            </div>
+            <div class="bell-icon" onclick="tg.showAlert('У вас 2 новых уведомления!')">
+                <span class="material-symbols-rounded" style="font-size: 22px;">notifications</span>
             </div>
         </div>
-        <div class="bell-icon" onclick="tg.showAlert('У вас 2 новых уведомления!')">
-            <span class="material-symbols-rounded" style="font-size: 22px;">notifications</span>
+
+        <div class="balance-card">
+            <div class="balance-title">
+                <span class="material-symbols-rounded" style="font-size: 18px;">auto_awesome</span>
+                Твои баллы за заботу о районе
+            </div>
+            <div class="balance-amount"><span id="user-balance">0</span> <span class="material-symbols-rounded" style="font-size: 36px; color: #ffd700;">star</span></div>
+            <div class="level-info">
+                <span>Уровень: Активист</span>
+                <span>650 / 1000</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill"></div>
+            </div>
         </div>
+
+        <div class="section-title">Быстрые действия</div>
+        <div class="actions-grid">
+            <div class="action-card" onclick="openMap()">
+                <div class="action-icon icon-map"><span class="material-symbols-rounded">map</span></div>
+                <div class="action-text">Карта района</div>
+            </div>
+            <div class="action-card" onclick="tg.showAlert('Форма отправки!')">
+                <div class="action-icon icon-cam"><span class="material-symbols-rounded">photo_camera</span></div>
+                <div class="action-text">Сообщить о проблеме</div>
+            </div>
+            <div class="action-card" onclick="tg.showAlert('Список соседей!')">
+                <div class="action-icon icon-help"><span class="material-symbols-rounded">group</span></div>
+                <div class="action-text">Помощь соседям</div>
+            </div>
+            <div class="action-card" onclick="tg.showAlert('Магазин скидок!')">
+                <div class="action-icon icon-gift"><span class="material-symbols-rounded">redeem</span></div>
+                <div class="action-text">Тратить баллы</div>
+            </div>
+        </div>
+
+        <div class="section-title">Лента района <span>Все</span></div>
+        
+        <div class="feed-card">
+            <div class="feed-icon" style="background:#e5f0ff; color:#007aff;"><span class="material-symbols-rounded">campaign</span></div>
+            <div class="feed-content">
+                <div class="feed-text"><b>Совет дома:</b> В эту субботу в 10:00 состоится субботник. Выходим чистить двор! За участие дадим по 100 баллов.</div>
+                <div class="feed-time">Сегодня, 09:41</div>
+            </div>
+        </div>
+    </div> 
+
+    <!-- ЭКРАН С КАРТОЙ -->
+    <div id="map-screen" class="map-container">
+        <div id="yandex-map" style="width: 100%; height: 100%;"></div>
+        <div onclick="openMain()" class="back-btn">← Назад</div>
     </div>
 
-    <div class="balance-card">
-        <div class="balance-title">
-            <span class="material-symbols-rounded" style="font-size: 18px;">auto_awesome</span>
-            Твои баллы за заботу о районе
-        </div>
-        <div class="balance-amount"><span id="user-balance">0</span> <span class="material-symbols-rounded" style="font-size: 36px; color: #ffd700;">star</span></div>
-        <div class="level-info">
-            <span>Уровень: Активист</span>
-            <span>650 / 1000</span>
-        </div>
-        <div class="progress-bar-bg">
-            <div class="progress-bar-fill"></div>
-        </div>
-    </div>
-
-    <div class="section-title">Быстрые действия</div>
-    <div class="actions-grid">
-        <div class="action-card" onclick="tg.showAlert('Здесь откроется карта!')">
-            <div class="action-icon icon-map"><span class="material-symbols-rounded">map</span></div>
-            <div class="action-text">Карта района</div>
-        </div>
-        <div class="action-card" onclick="tg.showAlert('Форма отправки!')">
-            <div class="action-icon icon-cam"><span class="material-symbols-rounded">photo_camera</span></div>
-            <div class="action-text">Сообщить о проблеме</div>
-        </div>
-        <div class="action-card" onclick="tg.showAlert('Список соседей!')">
-            <div class="action-icon icon-help"><span class="material-symbols-rounded">group</span></div>
-            <div class="action-text">Помощь соседям</div>
-        </div>
-        <div class="action-card" onclick="tg.showAlert('Магазин скидок!')">
-            <div class="action-icon icon-gift"><span class="material-symbols-rounded">redeem</span></div>
-            <div class="action-text">Тратить баллы</div>
-        </div>
-    </div>
-
-    <div class="section-title">Лента района <span>Все</span></div>
-    
-    <div class="feed-card">
-        <div class="feed-icon" style="background:#e5f0ff; color:#007aff;"><span class="material-symbols-rounded">campaign</span></div>
-        <div class="feed-content">
-            <div class="feed-text"><b>Совет дома:</b> В эту субботу в 10:00 состоится субботник. Выходим чистить двор! За участие дадим по 100 баллов.</div>
-            <div class="feed-time">Сегодня, 09:41</div>
-        </div>
-    </div>
-
+    <!-- НИЖНЕЕ МЕНЮ -->
     <div class="bottom-nav-wrapper">
         <div class="bottom-nav">
-            <div class="nav-item active">
-                <span class="material-symbols-rounded">home</span> Главная
-            </div>
-            <div class="nav-item" onclick="tg.showAlert('Карта появится позже!')">
+            <div class="nav-item active" id="nav-home" onclick="openMain()">
+                <span class="material-symbols-rounded">home</span> Главная</div>
+            <div class="nav-item" id="nav-map" onclick="openMap()">
                 <span class="material-symbols-rounded">location_on</span> Карта
             </div>
             <div class="nav-item" onclick="tg.showAlert('Раздел чатов!')">
@@ -169,19 +184,62 @@
         tg.expand();
         tg.setHeaderColor('#f2f4f7');
 
-        // Получаем имя пользователя
+        // Получение имени пользователя
         let userName = tg.initDataUnsafe?.user?.first_name;
-        
         if (userName) {
             document.getElementById('user-name').innerText = userName;
-            // Ставим первую букву имени на аватаркуdocument.getElementById('user-avatar').innerText = userName.charAt(0).toUpperCase();
+            document.getElementById('user-avatar').innerText = userName.charAt(0).toUpperCase();
         } else {
             document.getElementById('user-name').innerText = "Гость";
             document.getElementById('user-avatar').innerText = "Г";
         }
-
-        // Пока ставим фиксированные баллы, потом свяжем с ботом
         document.getElementById('user-balance').innerText = "150";
+
+        // --- ЛОГИКА КАРТЫ ---
+        let mapInitialized = false;
+
+        function openMap() {
+            document.getElementById('main-screen').style.display = 'none';
+            document.getElementById('map-screen').style.display = 'block';
+            
+            document.getElementById('nav-home').classList.remove('active');
+            document.getElementById('nav-map').classList.add('active');
+
+            if (!mapInitialized) {
+                ymaps.ready(initMap);
+                mapInitialized = true;
+            }
+        }
+
+        function openMain() {
+            document.getElementById('main-screen').style.display = 'block';
+            document.getElementById('map-screen').style.display = 'none';
+            
+            document.getElementById('nav-map').classList.remove('active');
+            document.getElementById('nav-home').classList.add('active');
+        }
+
+        function initMap() {
+            var myMap = new ymaps.Map("yandex-map", {
+                center: [55.751244, 37.618423], // Центр Москвы
+                zoom: 14,
+                controls: ['zoomControl', 'geolocationControl']
+            });
+
+            // Метка проблемы
+            var placemark = new ymaps.Placemark([55.751, 37.618], {
+                hintContent: 'Сломанная лавочка',
+                balloonContent: 'Здесь сломана лавочка. Статус: в работе.'
+            }, { preset: 'islands#redIcon' });
+            myMap.geoObjects.add(placemark);
+            
+            // Метка эко-точки
+            var ecoPlacemark = new ymaps.Placemark([55.753, 37.621], {
+                hintContent: 'Фандомат',
+                balloonContent: 'Сюда можно сдать пластик и получить баллы.'
+            }, { preset: 'islands#greenIcon' });
+            myMap.geoObjects.add(ecoPlacemark);
+        }
     </script>
 </body>
 </html>
