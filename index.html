@@ -84,6 +84,19 @@
         .category-sheet { position: fixed; bottom: -100%; left: 0; right: 0; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-radius: 24px 24px 0 0; padding: 24px; box-shadow: 0 -10px 30px rgba(0,0,0,0.1); transition: bottom 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 200; }
         .category-sheet.open { bottom: 0; }
         .category-sheet h3 { margin: 0 0 16px 0; font-size: 18px; text-align: center; }
+        
+        .desc-input {
+            width: 100%;
+            padding: 14px;
+            border-radius: 16px;
+            border: 1px solid #ddd;
+            background: #f2f4f7;
+            font-size: 15px;
+            margin-bottom: 16px;
+            outline: none;
+            font-family: inherit;
+        }
+
         .category-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .category-item { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; border-radius: 16px; background: #f2f4f7; cursor: pointer; transition: 0.2s; }
         .category-item:active { transform: scale(0.95); }
@@ -95,6 +108,29 @@
         .cat-help { color: #ff9500; background: #fff3cd; }
         .cat-security { color: #007aff; background: #e5f0ff; }
         .close-sheet { text-align: center; color: #8e8e93; font-weight: 600; margin-top: 16px; cursor: pointer; }
+
+        /* СТИЛИ ДЛЯ ЧАТОВ */
+        .screen { display: none; }
+        .screen.active { display: block; }
+        .chat-item { display: flex; align-items: center; padding: 12px; background: var(--bg-glass); border-radius: 16px; margin-bottom: 10px; cursor: pointer; border: 1px solid var(--border-glass); transition: 0.2s; }
+        .chat-item:active { background: rgba(255,255,255,0.9); transform: scale(0.98); }
+        .chat-info { flex-grow: 1; margin-left: 12px; overflow: hidden; }
+        .chat-name { font-weight: 700; font-size: 15px; }
+        .chat-last-msg { font-size: 13px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; margin-top: 2px; }
+        .chat-time { font-size: 11px; color: var(--text-muted); align-self: flex-start; margin-top: 4px; }
+
+        #chat-window { display: none; flex-direction: column; height: 75vh; background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); position: fixed; top: 10px; left: 10px; right: 10px; bottom: 10px; z-index: 1000; }
+        .chat-header { background: var(--bg-glass); padding: 16px; display: flex; align-items: center; border-bottom: 1px solid var(--border-glass); }
+        .back-arrow { font-size: 24px; cursor: pointer; margin-right: 16px; color: var(--accent); }
+        .chat-header-name { font-weight: 700; font-size: 16px; flex-grow: 1; }
+        .chat-messages { flex-grow: 1; padding: 16px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; background: #f9f9f9; }
+        .message { max-width: 80%; padding: 10px 14px; border-radius: 18px; font-size: 14px; line-height: 1.4; position: relative; }
+        .message.incoming { background: #e5e5ea; color: black; align-self: flex-start; border-bottom-left-radius: 4px; }
+        .message.outgoing { background: var(--accent); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+        .message-time { font-size: 10px; opacity: 0.7; margin-top: 4px; text-align: right; }
+        .chat-input-area { padding: 10px; background: white; display: flex; gap: 10px; border-top: 1px solid #eee; }
+        .chat-input { flex-grow: 1; padding: 12px; border-radius: 20px; border: 1px solid #ddd; background: #f2f4f7; outline: none; font-size: 14px; }
+        .chat-send-btn { width: 44px; height: 44px; border-radius: 50%; background: var(--accent); border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -103,7 +139,8 @@
     <div class="bg-blob-2"></div>
     <div class="bg-blob-3"></div>
 
-    <div id="main-screen">
+    <!-- ГЛАВНЫЙ ЭКРАН -->
+    <div id="main-screen" class="screen active">
         <div class="top-header">
             <div class="user-info">
                 <div class="avatar" id="user-avatar"></div>
@@ -163,17 +200,67 @@
         </div>
     </div> 
 
-    <div id="map-screen" class="map-container">
+    <!-- ЭКРАН КАРТЫ -->
+    <div id="map-screen" class="screen map-container">
         <div id="yandex-map" style="width: 100%; height: 100%;"></div>
         <div onclick="openMain()" class="back-btn">← Назад</div>
-        
         <div onclick="addMarkerAtCenter()" class="add-btn">
             <span class="material-symbols-rounded">add_location_alt</span>
         </div>
     </div>
 
+    <!-- ЭКРАН ЧАТОВ -->
+    <div id="chats-screen" class="screen">
+        <div id="chat-list-container">
+            <div class="section-title">Сообщения</div>
+            <div class="chat-item" onclick="openChat('user_2', 'Мария', 'М')">
+                <div class="avatar" style="background: linear-gradient(135deg, #ff758c, #ff7eb3);">М</div>
+                <div class="chat-info">
+                    <div class="chat-name">Мария (кв. 42)</div>
+                    <div class="chat-last-msg" id="last-msg-user_2">Привет! Выйдешь на субботник?</div>
+                </div>
+                <div class="chat-time">10:45</div>
+            </div>
+            <div class="chat-item" onclick="openChat('user_3', 'Иван', 'И')">
+                <div class="avatar" style="background: linear-gradient(135deg, #667eea, #764ba2);">И</div>
+                <div class="chat-info">
+                    <div class="chat-name">Иван (кв. 15)</div>
+                    <div class="chat-last-msg" id="last-msg-user_3">Одолжи дрель, пожалуйста</div>
+                </div>
+                <div class="chat-time">Вчера</div>
+            </div>
+        </div>
+        <div id="chat-window">
+            <div class="chat-header">
+                <div class="back-arrow" onclick="closeChat()">←</div>
+                <div class="chat-header-name" id="chat-header-name">Имя</div>
+            </div>
+            <div class="chat-messages" id="chat-messages-container"></div>
+            <div class="chat-input-area">
+                <input type="text" id="message-input" class="chat-input" placeholder="Написать сообщение..." onkeypress="handleKeyPress(event)">
+                <button class="chat-send-btn" onclick="sendMessage()">
+                    <span class="material-symbols-rounded" style="color: white;">send</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ЭКРАН ПРОФИЛЯ -->
+    <div id="profile-screen" class="screen">
+        <div class="section-title">Мой профиль</div>
+        <div class="action-card" style="text-align: center; padding: 40px;">
+            <span class="material-symbols-rounded" style="font-size: 64px; color: var(--accent);">person</span>
+            <div class="action-text" style="margin-top: 16px;">Тут будет твой профиль</div>
+        </div>
+    </div>
+
+    <!-- МЕНЮ КАТЕГОРИЙ (С ПОЛЕМ ВВОДА) -->
     <div id="category-sheet" class="category-sheet">
         <h3>Что вы хотите отметить?</h3>
+        
+        <!-- Поле для описания -->
+        <input type="text" id="problem-desc" class="desc-input" placeholder="Добавьте описание (например: 'Яма у 3 подъезда')">
+        
         <div class="category-grid">
             <div class="category-item" onclick="selectCategory('repair')">
                 <span class="material-symbols-rounded cat-repair">build</span>
@@ -195,6 +282,7 @@
         <div class="close-sheet" onclick="hideCategorySheet()">Отмена</div>
     </div>
 
+    <!-- НИЖНЕЕ МЕНЮ -->
     <div class="bottom-nav-wrapper">
         <div class="bottom-nav">
             <div class="nav-item active" id="nav-home" onclick="openMain()">
@@ -203,10 +291,10 @@
             <div class="nav-item" id="nav-map" onclick="openMap()">
                 <span class="material-symbols-rounded">location_on</span> Карта
             </div>
-            <div class="nav-item" onclick="tg.showAlert('Раздел чатов!')">
+            <div class="nav-item" id="nav-chats" onclick="openChats()">
                 <span class="material-symbols-rounded">chat</span> Чаты
             </div>
-            <div class="nav-item" onclick="tg.showAlert('Твой профиль!')">
+            <div class="nav-item" id="nav-profile" onclick="openProfile()">
                 <span class="material-symbols-rounded">person</span> Профиль
             </div>
         </div>
@@ -232,11 +320,24 @@
         let mapInitialized = false;
         let tempCoords = null; 
 
+        // --- НАВИГАЦИЯ ---
+        function hideAllScreens() {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        }
+
+        function openMain() {
+            hideAllScreens();
+            document.getElementById('main-screen').classList.add('active');
+            document.getElementById('nav-home').classList.add('active');
+            closeChat(); 
+        }
+
         function openMap() {
-            document.getElementById('main-screen').style.display = 'none';
-            document.getElementById('map-screen').style.display = 'block';
-            document.getElementById('nav-home').classList.remove('active');
+            hideAllScreens();
+            document.getElementById('map-screen').classList.add('active');
             document.getElementById('nav-map').classList.add('active');
+            closeChat();
 
             if (!mapInitialized) {
                 ymaps.ready(function() {
@@ -246,13 +347,20 @@
             }
         }
 
-        function openMain() {
-            document.getElementById('main-screen').style.display = 'block';
-            document.getElementById('map-screen').style.display = 'none';
-            document.getElementById('nav-map').classList.remove('active');
-            document.getElementById('nav-home').classList.add('active');
+        function openChats() {
+            hideAllScreens();
+            document.getElementById('chats-screen').classList.add('active');
+            document.getElementById('nav-chats').classList.add('active');
         }
 
+        function openProfile() {
+            hideAllScreens();
+            document.getElementById('profile-screen').classList.add('active');
+            document.getElementById('nav-profile').classList.add('active');
+            closeChat();
+        }
+
+        // --- КАРТА ---
         function initMap() {
             myMap = new ymaps.Map("yandex-map", {
                 center: [55.751244, 37.618423],
@@ -260,12 +368,13 @@
                 controls: ['zoomControl']
             });
 
-            addMarkerToMap([55.751, 37.618], 'repair', 'Сломанная лавочка', 'В работе');
-            addMarkerToMap([55.753, 37.621], 'eco', 'Фандомат', 'Сюда можно сдать пластик');
-            addMarkerToMap([55.752, 37.620], 'help', 'Помощь', 'Нужна помощь соседей');
+            addMarkerToMap([55.751, 37.618], 'repair', 'Сломанная лавочка', 'Спинка сломана, сидеть невозможно.');
+            addMarkerToMap([55.753, 37.621], 'eco', 'Фандомат', 'Сюда можно сдать пластик.');
 
             myMap.events.add('click', function (e) {
                 tempCoords = e.get('coords');
+                // Очищаем поле ввода при открытии
+                document.getElementById('problem-desc').value = '';
                 document.getElementById('category-sheet').classList.add('open');
             });
         }
@@ -273,6 +382,7 @@
         function addMarkerAtCenter() {
             if (!myMap) return;
             tempCoords = myMap.getCenter();
+            document.getElementById('problem-desc').value = '';
             document.getElementById('category-sheet').classList.add('open');
         }
 
@@ -283,51 +393,43 @@
 
         function selectCategory(type) {
             document.getElementById('category-sheet').classList.remove('open');
-            
             if (!tempCoords) return;
 
-            let title, desc;
-            if (type === 'repair') { title = 'Проблема (Ремонт)'; desc = 'Нужен ремонт.'; }
-            if (type === 'eco') { title = 'Экология'; desc = 'Вопрос по экологии.'; }
-            if (type === 'help') { title = 'Нужна помощь'; desc = 'Требуется помощь.'; }
-            if (type === 'security') { title = 'Безопасность'; desc = 'Вопрос безопасности.'; }
+            // Берем текст из поля ввода
+            let userDesc = document.getElementById('problem-desc').value.trim();
+            
+            let title, defaultDesc;
+            if (type === 'repair') { title = 'Проблема (Ремонт)'; defaultDesc = 'Нужен ремонт.'; }
+            if (type === 'eco') { title = 'Экология'; defaultDesc = 'Вопрос по экологии.'; }
+            if (type === 'help') { title = 'Нужна помощь'; defaultDesc = 'Требуется помощь.'; }
+            if (type === 'security') { title = 'Безопасность'; defaultDesc = 'Вопрос безопасности.'; }
 
-            addMarkerToMap(tempCoords, type, title, desc);
+            // Если пользователь что-то ввел, используем это, иначе стандартный текст
+            let finalDesc = userDesc ? userDesc : defaultDesc;
+
+            addMarkerToMap(tempCoords, type, title, finalDesc);
             tempCoords = null;
         }
 
-        // СТЕКЛЯННЫЕ МЕТКИ (GLASSMORPHISM)
+        // ДОБАВЛЕНЫ БАЛУНЫ (ВСПЛЫВАЮЩИЕ ОКНА)
         function addMarkerToMap(coords, type, title, desc) {
-            let color = 'rgba(255, 59, 48, 0.8)'; // Ремонт (красный)
+            let color = 'rgba(255, 59, 48, 0.8)'; 
             let icon = 'build';
-
             if (type === 'eco') { color = 'rgba(52, 199, 89, 0.8)'; icon = 'eco'; }
             if (type === 'help') { color = 'rgba(255, 149, 0, 0.8)'; icon = 'volunteer_activism'; }
             if (type === 'security') { color = 'rgba(0, 122, 255, 0.8)'; icon = 'shield'; }
 
-            // Создаем стеклянный эффект с размытием и прозрачностью
             let htmlLayout = `
-                <div style="
-                    width: 46px; 
-                    height: 46px; 
-                    background-color: ${color}; 
-                    border-radius: 50% 50% 50% 0;
-                    transform: rotate(-45deg);
-                    display: flex; 
-                    align-items: center; 
-                    justify-content: center;
-                    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-                    border: 2px solid rgba(255, 255, 255, 0.7);
-                    backdrop-filter: blur(8px);
-                    -webkit-backdrop-filter: blur(8px);
-                ">
+                <div style="width: 46px; height: 46px; background-color: ${color}; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(0,0,0,0.2); border: 2px solid rgba(255, 255, 255, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
                     <span class="material-symbols-rounded" style="color: white; font-size: 24px; transform: rotate(45deg); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">${icon}</span>
                 </div>
             `;
 
             var placemark = new ymaps.Placemark(coords, {
-                hintContent: title,
-                balloonContent: desc
+                // ВОТ ЗДЕСЬ МЫ ПЕРЕДАЕМ ОПИСАНИЕ В БАЛУН
+                hintContent: title, 
+                balloonContentHeader: title, // Заголовок окна
+                balloonContentBody: desc,    // Текст, который ввел пользователь
             }, { 
                 iconLayout: 'default#imageWithContent',
                 iconImageHref: 'https://yandex.ru/images/template/clear.png',
@@ -336,8 +438,77 @@
                 iconContentOffset: [0, 0],
                 iconContentLayout: ymaps.templateLayoutFactory.createClass(htmlLayout)
             });
-            
             myMap.geoObjects.add(placemark);
+        }
+
+        // --- ЧАТЫ ---
+        let currentChatId = null;
+        let chatHistory = {
+            'user_2': [
+                { sender: 'user_2', text: 'Привет! Выйдешь на субботник?', time: '10:45' },
+                { sender: 'me', text: 'Привет, да, планирую!', time: '10:46' }
+            ],
+            'user_3': [
+                { sender: 'user_3', text: 'Одолжи дрель, пожалуйста', time: 'Вчера' }
+            ]
+        };
+
+        function openChat(userId, name) {
+            currentChatId = userId;
+            document.getElementById('chat-list-container').style.display = 'none';
+            document.getElementById('chat-window').style.display = 'flex';
+            document.getElementById('chat-header-name').innerText = name;
+            renderMessages(userId);
+        }
+
+        function closeChat() {
+            currentChatId = null;
+            document.getElementById('chat-window').style.display = 'none';
+            document.getElementById('chat-list-container').style.display = 'block';
+        }
+
+        function renderMessages(userId) {
+            const container = document.getElementById('chat-messages-container');
+            container.innerHTML = '';
+            let messages = chatHistory[userId] || [];
+            
+            messages.forEach(msg => {
+                let isMe = msg.sender === 'me';
+                let msgDiv = document.createElement('div');
+                msgDiv.className = `message ${isMe ? 'outgoing' : 'incoming'}`;
+                msgDiv.innerHTML = `
+                    ${msg.text}
+                    <div class="message-time">${msg.time}</div>
+                `;
+                container.appendChild(msgDiv);
+            });
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function sendMessage() {
+            let input = document.getElementById('message-input');
+            let text = input.value.trim();
+            if (!text || !currentChatId) return;
+
+            let now = new Date();
+            let timeStr = now.getHours() + ':' + now.getMinutes().toString().padStart(2, '0');
+            
+            if (!chatHistory[currentChatId]) chatHistory[currentChatId] = [];
+            chatHistory[currentChatId].push({ sender: 'me', text: text, time: timeStr });
+
+            input.value = '';
+            renderMessages(currentChatId);
+            
+            // ИМИТАЦИЯ ОТВЕТА
+            setTimeout(() => {
+                let botReply = "Понял тебя! Это тестовый ответ от соседа.";
+                chatHistory[currentChatId].push({ sender: currentChatId, text: botReply, time: timeStr });
+                renderMessages(currentChatId);
+            }, 1500);
+        }
+
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') sendMessage();
         }
     </script>
 </body>
