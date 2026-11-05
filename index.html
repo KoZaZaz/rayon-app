@@ -104,7 +104,6 @@
         .close-sheet { text-align: center; color: #8e8e93; font-weight: 600; margin-top: 16px; cursor: pointer; }
 
         .screen { display: none; }
-        .screen.active { display: block; }
         .chat-item { display: flex; align-items: center; padding: 12px; background: var(--bg-glass); border-radius: 16px; margin-bottom: 10px; cursor: pointer; border: 1px solid var(--border-glass); transition: 0.2s; }
         .chat-item:active { background: rgba(255,255,255,0.9); transform: scale(0.98); }
         .chat-info { flex-grow: 1; margin-left: 12px; overflow: hidden; }
@@ -179,7 +178,7 @@
     <div class="bg-blob-3"></div>
 
     <!-- ЭКРАН ВХОДА -->
-    <div id="auth-screen" class="screen active">
+    <div id="auth-screen" style="display: none;">
         <div class="auth-card">
             <div class="auth-title">RAYON</div>
             <div class="auth-subtitle">Твой район, твои правила</div>
@@ -190,7 +189,7 @@
     </div>
 
     <!-- ГЛАВНЫЙ ЭКРАН -->
-    <div id="main-screen" class="screen">
+    <div id="main-screen" class="screen" style="display: none;">
         <div class="top-header">
             <div class="user-info">
                 <div class="avatar" id="user-avatar"></div>
@@ -473,55 +472,109 @@
                 }
             }
 
-            currentUserNick = login;
-            userName = usersDB[login].name;
-            localStorage.setItem('current_user_nick', currentUserNick);
-            
-            updateUserInterface(userName, usersDB[login].nick);
-            showMainApp();
+            localStorage.setItem('current_user_nick', login);
+            window.location.reload(); // Перезагрузка для чистого старта
         }
 
-        function updateUserInterface(name, nick) {
-            document.getElementById('user-name').innerText = name;
-            document.getElementById('user-avatar').innerText = name.charAt(0).toUpperCase();
-            document.getElementById('profile-name').innerText = name;
-            document.getElementById('profile-nick').innerText = nick;
-            document.getElementById('profile-avatar').innerText = name.charAt(0).toUpperCase();
-        }
+        // === ИНИЦИАЛИЗАЦИЯ ПРИ ЗАПУСКЕ ===
+        window.onload = function() {
+            if (currentUserNick && usersDB[currentUserNick]) {
+                // Пользователь уже вошел
+                userName = usersDB[currentUserNick].name;
+                
+                // Скрываем авторизацию
+                document.getElementById('auth-screen').style.display = 'none';
+                
+                // Показываем главный экран
+                document.getElementById('main-screen').style.display = 'block';
+                document.querySelector('.bottom-nav-wrapper').style.display = 'block';
+                
+                // Обновляем данные
+                document.getElementById('user-name').innerText = userName;
+                document.getElementById('user-avatar').innerText = userName.charAt(0).toUpperCase();
+                document.getElementById('profile-name').innerText = userName;
+                document.getElementById('profile-nick').innerText = usersDB[currentUserNick].nick;
+                document.getElementById('profile-avatar').innerText = userName.charAt(0).toUpperCase();
 
-        function showMainApp() {
-            // СКРЫВАЕМ ЭКРАН РЕГИСТРАЦИИ И ПОКАЗЫВАЕМ ГЛАВНЫЙ
-            document.getElementById('auth-screen').style.display = 'none';
-            document.getElementById('main-screen').style.display = 'block';
-            document.querySelector('.bottom-nav-wrapper').style.display = 'block';
-            document.getElementById('nav-home').classList.add('active');
-            
-            updateUI();
-            renderFeed();
-        }
+                updateUI();
+                renderFeed();
+            } else {
+                // Пользователь не вошел
+                document.getElementById('auth-screen').style.display = 'flex';
+                document.getElementById('main-screen').style.display = 'none';
+                document.querySelector('.bottom-nav-wrapper').style.display = 'none';
+            }
+        };
 
-        // Проверка при старте
-        if (currentUserNick && usersDB[currentUserNick]) {
-            userName = usersDB[currentUserNick].name;
-            updateUserInterface(userName, usersDB[currentUserNick].nick);
-            showMainApp();
-        } else {
-            document.getElementById('auth-screen').style.display = 'flex';
+        // === НАВИГАЦИЯ (ЖЕСТКАЯ) ===
+        function hideAllScreens() {
+            // Скрываем все экраны
             document.getElementById('main-screen').style.display = 'none';
-            document.querySelector('.bottom-nav-wrapper').style.display = 'none';
+            document.getElementById('feed-screen').style.display = 'none';
+            document.getElementById('history-screen').style.display = 'none';
+            document.getElementById('friends-screen').style.display = 'none';
+            document.getElementById('map-screen').style.display = 'none';
+            document.getElementById('chats-screen').style.display = 'none';
+            document.getElementById('profile-screen').style.display = 'none';
+            
+            // Убираем активные классы с меню
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            // Прячем кнопку создания поста
+            document.getElementById('create-post-btn').style.display = 'none';
+            
+            closeChat();
         }
 
-        // === ПОИСК ДРУЗЕЙ ===
-        let foundUser = null;
+        function openMain() { 
+            hideAllScreens(); 
+            document.getElementById('main-screen').style.display = 'block'; 
+            document.getElementById('nav-home').classList.add('active'); 
+        }
 
+        function openFeed() { 
+            hideAllScreens(); 
+            document.getElementById('feed-screen').style.display = 'block'; 
+            document.getElementById('nav-feed').classList.add('active'); 
+            document.getElementById('create-post-btn').style.display = 'flex'; 
+            renderFeed(); 
+        }
+        
+        function openFriends() { 
+            hideAllScreens(); 
+            document.getElementById('friends-screen').style.display = 'block'; 
+        }
+        
+        function openMap() { 
+            hideAllScreens(); 
+            document.getElementById('map-screen').style.display = 'block'; 
+            document.getElementById('nav-map').classList.add('active'); 
+            if (!mapInitialized) { ymaps.ready(function() { initMap(); mapInitialized = true; }); } 
+        }
+        
+        function openChats() { 
+            hideAllScreens(); 
+            document.getElementById('chats-screen').style.display = 'block'; 
+        }
+        
+        function openProfile() { 
+            hideAllScreens(); 
+            document.getElementById('profile-screen').style.display = 'block'; 
+            document.getElementById('nav-profile').classList.add('active'); 
+        }
+
+        function openHistory() { 
+            hideAllScreens(); 
+            document.getElementById('history-screen').style.display = 'block'; 
+        }
+
+        // === ОСТАЛЬНЫЕ ФУНКЦИИ (БЕЗ ИЗМЕНЕНИЙ) ===
+        let foundUser = null;
         function searchFriendByNick() {
             let query = document.getElementById('search-nick').value.trim().replace('@', '').toLowerCase();
             let resultCard = document.getElementById('search-result');
-            
             if (!query) { tg.showAlert("Введите ник"); return; }
-
             let foundKey = Object.keys(usersDB).find(key => key.toLowerCase() === query && key !== currentUserNick);
-
             if (foundKey) {
                 foundUser = usersDB[foundKey];
                 document.getElementById('found-name').innerText = foundUser.name;
@@ -530,18 +583,16 @@
                 resultCard.style.display = 'block';
             } else {
                 resultCard.style.display = 'none';
-                tg.showAlert("Пользователь с таким ником не найден 😔");
+                tg.showAlert("Пользователь не найден 😔");
             }
         }
-
         function addFriend() {
             if (!foundUser) return;
-            tg.showAlert(`Вы отправили заявку в друзья ${foundUser.name}!`);
+            tg.showAlert(`Заявка отправлена ${foundUser.name}!`);
             document.getElementById('search-result').style.display = 'none';
             document.getElementById('search-nick').value = '';
         }
 
-        // === СИСТЕМА ЛИМИТОВ ===
         function checkPostLimit() {
             let today = new Date().toDateString();
             let lastDate = localStorage.getItem('last_post_date');
@@ -558,7 +609,6 @@
             localStorage.setItem('post_count_today', count + 1);
         }
 
-        // === ЛЕНТА ===
         let feedPosts = JSON.parse(localStorage.getItem('rayon_feed')) || [
             { id: 1, author: 'Совет дома', text: 'В эту субботу в 10:00 состоится субботник!', image: null, likes: 12, time: 'Сегодня, 09:41', isMe: false, likedByMe: false },
             { id: 2, author: 'Мария', text: 'Смотрите, какие красивые цветы расцвели у 3-го подъезда! 🌸', image: 'https://images.unsplash.com/photo-1490750967868-88cb44c3c70c?auto=format&fit=crop&w=500&q=60', likes: 24, time: 'Вчера, 18:20', isMe: false, likedByMe: false }
@@ -571,13 +621,11 @@
             let container = document.getElementById('feed-container');
             if (!container) return;
             container.innerHTML = '';
-            
             feedPosts.forEach(post => {
                 let imageHtml = post.image ? `<img src="${post.image}" class="post-image">` : '';
                 let menuBtnHtml = post.isMe ? `<span class="material-symbols-rounded post-menu-btn" onclick="openPostActions(${post.id})">more_vert</span>` : '';
                 let likeClass = post.likedByMe ? 'liked' : '';
                 let likeIcon = post.likedByMe ? 'favorite' : 'favorite_border';
-
                 container.innerHTML += `
                     <div class="feed-post">
                         <div class="post-header">
@@ -606,54 +654,40 @@
         function toggleLike(id) {
             let post = feedPosts.find(p => p.id === id);
             if (post) {
-                if (post.likedByMe) {
-                    post.likes--;
-                    post.likedByMe = false;
-                } else {
-                    post.likes++;
-                    post.likedByMe = true;
-                }
+                if (post.likedByMe) { post.likes--; post.likedByMe = false; } 
+                else { post.likes++; post.likedByMe = true; }
                 localStorage.setItem('rayon_feed', JSON.stringify(feedPosts));
                 renderFeed();
             }
         }
 
-        // Управление постами
         let postImageData = null;
-
         function openCreatePostSheet() { 
             let count = checkPostLimit();
             if (count >= 3) { tg.showAlert("Лимит: 3 поста в день."); return; }
-            
             editingPostId = null;
             document.getElementById('post-sheet-title').innerText = "Новый пост";
             document.getElementById('save-post-btn').innerText = "Опубликовать";
             document.getElementById('post-text-input').value = '';
             document.getElementById('post-image-preview').style.display = 'none';
             postImageData = null;
-            
             document.getElementById('create-post-sheet').classList.add('open'); 
         }
-
         function openPostActions(id) {
             selectedPostIdForAction = id;
             document.getElementById('post-actions-sheet').classList.add('open');
         }
-
         function closePostActionsSheet() {
             document.getElementById('post-actions-sheet').classList.remove('open');
             selectedPostIdForAction = null;
         }
-
         function editPost() {
             let post = feedPosts.find(p => p.id === selectedPostIdForAction);
             if (!post) return;
-
             editingPostId = post.id;
             document.getElementById('post-sheet-title').innerText = "Редактировать пост";
             document.getElementById('save-post-btn').innerText = "Сохранить";
             document.getElementById('post-text-input').value = post.text;
-            
             if (post.image) {
                 postImageData = post.image;
                 let img = document.getElementById('post-image-preview');
@@ -663,19 +697,15 @@
                 document.getElementById('post-image-preview').style.display = 'none';
                 postImageData = null;
             }
-
             closePostActionsSheet();
             document.getElementById('create-post-sheet').classList.add('open');
         }
-
         function sharePost() {
             let post = feedPosts.find(p => p.id === selectedPostIdForAction);
             if (!post) return;
-            let shareText = `Пост от ${post.author} в RAYON:\n\n"${post.text}"`;
-            tg.switchInlineQuery(shareText, ["users", "groups", "channels"]);
+            tg.switchInlineQuery(`Пост от ${post.author} в RAYON:\n\n"${post.text}"`, ["users", "groups", "channels"]);
             closePostActionsSheet();
         }
-
         function deletePost() {
             if (!confirm("Вы уверены, что хотите удалить этот пост?")) return;
             feedPosts = feedPosts.filter(p => p.id !== selectedPostIdForAction);
@@ -684,7 +714,6 @@
             renderFeed();
             tg.showAlert("Пост удален");
         }
-
         function closeCreatePostSheet() {
             document.getElementById('create-post-sheet').classList.remove('open');
             document.getElementById('post-text-input').value = '';
@@ -692,7 +721,6 @@
             postImageData = null;
             editingPostId = null;
         }
-
         function previewPostImage(event) {
             let file = event.target.files[0];
             if (!file) return;
@@ -706,45 +734,27 @@
             };
             reader.readAsDataURL(file);
         }
-
         function savePost() {
             let text = document.getElementById('post-text-input').value.trim();
             if (!text && !postImageData) { tg.showAlert("Напишите текст или добавьте фото"); return; }
-
             let now = new Date();
             let timeStr = "Сегодня, " + now.getHours() + ':' + now.getMinutes().toString().padStart(2, '0');
-
             if (editingPostId) {
                 let post = feedPosts.find(p => p.id === editingPostId);
-                if (post) {
-                    post.text = text;
-                    post.image = postImageData;
-                    post.time = timeStr;
-                }
+                if (post) { post.text = text; post.image = postImageData; post.time = timeStr; }
                 tg.showAlert("Пост обновлен!");
             } else {
-                let newPost = {
-                    id: Date.now(),
-                    author: userName,
-                    text: text,
-                    image: postImageData,
-                    likes: 0,
-                    time: timeStr,
-                    isMe: true,
-                    likedByMe: false
-                };
+                let newPost = { id: Date.now(), author: userName, text: text, image: postImageData, likes: 0, time: timeStr, isMe: true, likedByMe: false };
                 feedPosts.unshift(newPost);
                 updateScore(5, "Новый пост в Пульсе");
                 incrementPostCount();
                 tg.showAlert("Пост опубликован! +5 баллов");
             }
-
             localStorage.setItem('rayon_feed', JSON.stringify(feedPosts));
             closeCreatePostSheet();
             renderFeed();
         }
 
-        // === БАЛЛЫ ===
         function changeProfileBg(event) {
             let file = event.target.files[0];
             if (!file) return;
@@ -813,7 +823,6 @@
             });
         }
 
-        function openHistory() { hideAllScreens(); document.getElementById('history-screen').classList.add('active'); document.getElementById('history-screen').style.display = 'block'; }
         function openGiftSheet() { document.getElementById('gift-sheet').classList.add('open'); }
         function closeGiftSheet() { document.getElementById('gift-sheet').classList.remove('open'); }
         function sendGift() {
@@ -825,75 +834,9 @@
             closeGiftSheet();
         }
 
-        // === НАВИГАЦИЯ ===
         let myMap;
         let mapInitialized = false;
         let tempCoords = null; 
-
-        function hideAllScreens() {
-            // Скрываем все экраны, КРОМЕ auth-screen
-            document.querySelectorAll('.screen').forEach(s => {
-                if (s.id !== 'auth-screen') {
-                    s.classList.remove('active');
-                    s.style.display = 'none'; // Принудительно скрываем
-                }
-            });
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            
-            let postBtn = document.getElementById('create-post-btn');
-            if (postBtn) postBtn.style.display = 'none';
-            
-            closeChat();
-        }
-
-        function openMain() { 
-            hideAllScreens(); 
-            let el = document.getElementById('main-screen');
-            el.classList.add('active'); 
-            el.style.display = 'block';
-            document.getElementById('nav-home').classList.add('active'); 
-        }
-
-        function openFeed() { 
-            hideAllScreens(); 
-            let el = document.getElementById('feed-screen');
-            el.classList.add('active'); 
-            el.style.display = 'block';
-            document.getElementById('nav-feed').classList.add('active'); 
-            document.getElementById('create-post-btn').style.display = 'flex'; 
-            renderFeed(); 
-        }
-        
-        function openFriends() { 
-            hideAllScreens(); 
-            let el = document.getElementById('friends-screen');
-            el.classList.add('active'); 
-            el.style.display = 'block';
-        }
-        
-        function openMap() { 
-            hideAllScreens(); 
-            let el = document.getElementById('map-screen');
-            el.classList.add('active'); 
-            el.style.display = 'block';
-            document.getElementById('nav-map').classList.add('active'); 
-            if (!mapInitialized) { ymaps.ready(function() { initMap(); mapInitialized = true; }); } 
-        }
-        
-        function openChats() { 
-            hideAllScreens(); 
-            let el = document.getElementById('chats-screen');
-            el.classList.add('active'); 
-            el.style.display = 'block';
-        }
-        
-        function openProfile() { 
-            hideAllScreens(); 
-            let el = document.getElementById('profile-screen');
-            el.classList.add('active'); 
-            el.style.display = 'block';
-            document.getElementById('nav-profile').classList.add('active'); 
-        }
 
         function initMap() {
             myMap = new ymaps.Map("yandex-map", { center: [55.751244, 37.618423], zoom: 15, controls: ['zoomControl'] });
