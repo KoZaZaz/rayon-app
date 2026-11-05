@@ -74,7 +74,7 @@
         .icon-gift { background: #e8f5e9; color: #34c759; }
         .action-text { font-weight: 700; font-size: 15px; }
         
-        .bottom-nav-wrapper { position: fixed; bottom: 20px; left: 16px; right: 16px; z-index: 100; }
+        .bottom-nav-wrapper { position: fixed; bottom: 20px; left: 16px; right: 16px; z-index: 100; display: none; }
         .bottom-nav { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--border-glass); display: flex; justify-content: space-around; padding: 12px 8px; border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
         .nav-item { text-align: center; font-size: 11px; font-weight: 600; color: var(--text-muted); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: 0.2s; width: 25%; }
         .nav-item span.material-symbols-rounded { transition: 0.2s; opacity: 0.6; }
@@ -463,13 +463,11 @@
             
             if (!login || !password) { tg.showAlert("Заполните все поля"); return; }
 
-            // Если пользователя нет в базе — регистрируем
             if (!usersDB[login]) {
                 usersDB[login] = { name: login, nick: "@" + login, password: password };
                 localStorage.setItem('rayon_users', JSON.stringify(usersDB));
                 tg.showAlert("Регистрация успешна!");
             } else {
-                // Если есть — проверяем пароль
                 if (usersDB[login].password !== password) {
                     tg.showAlert("Неверный пароль!"); return;
                 }
@@ -491,27 +489,55 @@
         }
 
         function showMainApp() {
-            // Прячем экран регистрации, показываем главный
-            document.getElementById('auth-screen').classList.remove('active');
-            document.getElementById('main-screen').classList.add('active');
-            
-            // Активируем нижнее меню
-            document.getElementById('nav-home').classList.add('active');
-            document.querySelector('.bottom-nav-wrapper').style.display = 'block';
-            
-            // Запускаем обновление данных
+            // ЖЕСТКО СКРЫВАЕМ ЭКРАН РЕГИСТРАЦИИ
+            let authScreen = document.getElementById('auth-screen');
+            if (authScreen) {
+                authScreen.style.display = 'none'; 
+                authScreen.classList.remove('active');
+            }
+
+            // ПОКАЗЫВАЕМ ГЛАВНЫЙ ЭКРАН
+            let mainScreen = document.getElementById('main-screen');
+            if (mainScreen) {
+                mainScreen.style.display = 'block'; 
+                mainScreen.classList.add('active');
+            }
+
+            // ПОКАЗЫВАЕМ НИЖНЕЕ МЕНЮ
+            let navWrapper = document.querySelector('.bottom-nav-wrapper');
+            if (navWrapper) {
+                navWrapper.style.display = 'block';
+            }
+
+            // Активируем вкладку "Главная"
+            let navHome = document.getElementById('nav-home');
+            if (navHome) navHome.classList.add('active');
+
+            // Обновляем данные
             updateUI();
             renderFeed();
         }
 
-        // Проверяем, залогинен ли пользователь при старте
+        // Проверка при старте
         if (currentUserNick && usersDB[currentUserNick]) {
             updateUserInterface(usersDB[currentUserNick].name, usersDB[currentUserNick].nick);
             showMainApp();
         } else {
-            // Если нет — показываем только экран регистрации, меню прячем
-            document.getElementById('auth-screen').classList.add('active');
-            document.querySelector('.bottom-nav-wrapper').style.display = 'none';
+            // Если не залогинен — показываем регистрацию, скрываем всё остальное
+            let authScreen = document.getElementById('auth-screen');
+            if (authScreen) {
+                authScreen.style.display = 'flex';
+                authScreen.classList.add('active');
+            }
+            
+            let mainScreen = document.getElementById('main-screen');
+            if (mainScreen) {
+                mainScreen.style.display = 'none';
+                mainScreen.classList.remove('active');
+            }
+
+            let navWrapper = document.querySelector('.bottom-nav-wrapper');
+            if (navWrapper) navWrapper.style.display = 'none';
         }
 
         // === ПОИСК ДРУЗЕЙ ===
@@ -816,7 +842,7 @@
             });
         }
 
-        function openHistory() { hideAllScreens(); document.getElementById('history-screen').classList.add('active'); }
+        function openHistory() { hideAllScreens(); document.getElementById('history-screen').classList.add('active'); document.getElementById('history-screen').style.display = 'block'; }
         function openGiftSheet() { document.getElementById('gift-sheet').classList.add('open'); }
         function closeGiftSheet() { document.getElementById('gift-sheet').classList.remove('open'); }
         function sendGift() {
@@ -834,18 +860,69 @@
         let tempCoords = null; 
 
         function hideAllScreens() {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            // Скрываем все экраны, КРОМЕ auth-screen
+            document.querySelectorAll('.screen').forEach(s => {
+                if (s.id !== 'auth-screen') {
+                    s.classList.remove('active');
+                    s.style.display = 'none'; // Принудительно скрываем
+                }
+            });
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById('create-post-btn').style.display = 'none';
+            
+            let postBtn = document.getElementById('create-post-btn');
+            if (postBtn) postBtn.style.display = 'none';
+            
             closeChat();
         }
 
-        function openMain() { hideAllScreens(); document.getElementById('main-screen').classList.add('active'); document.getElementById('nav-home').classList.add('active'); }
-        function openFeed() { hideAllScreens(); document.getElementById('feed-screen').classList.add('active'); document.getElementById('nav-feed').classList.add('active'); document.getElementById('create-post-btn').style.display = 'flex'; renderFeed(); }
-        function openFriends() { hideAllScreens(); document.getElementById('friends-screen').classList.add('active'); }
-        function openMap() { hideAllScreens(); document.getElementById('map-screen').classList.add('active'); document.getElementById('nav-map').classList.add('active'); if (!mapInitialized) { ymaps.ready(function() { initMap(); mapInitialized = true; }); } }
-        function openChats() { hideAllScreens(); document.getElementById('chats-screen').classList.add('active'); }
-        function openProfile() { hideAllScreens(); document.getElementById('profile-screen').classList.add('active'); document.getElementById('nav-profile').classList.add('active'); }
+        function openMain() { 
+            hideAllScreens(); 
+            let el = document.getElementById('main-screen');
+            el.classList.add('active'); 
+            el.style.display = 'block';
+            document.getElementById('nav-home').classList.add('active'); 
+        }
+
+        function openFeed() { 
+            hideAllScreens(); 
+            let el = document.getElementById('feed-screen');
+            el.classList.add('active'); 
+            el.style.display = 'block';
+            document.getElementById('nav-feed').classList.add('active'); 
+            document.getElementById('create-post-btn').style.display = 'flex'; 
+            renderFeed(); 
+        }
+        
+        function openFriends() { 
+            hideAllScreens(); 
+            let el = document.getElementById('friends-screen');
+            el.classList.add('active'); 
+            el.style.display = 'block';
+        }
+        
+        function openMap() { 
+            hideAllScreens(); 
+            let el = document.getElementById('map-screen');
+            el.classList.add('active'); 
+            el.style.display = 'block';
+            document.getElementById('nav-map').classList.add('active'); 
+            if (!mapInitialized) { ymaps.ready(function() { initMap(); mapInitialized = true; }); } 
+        }
+        
+        function openChats() { 
+            hideAllScreens(); 
+            let el = document.getElementById('chats-screen');
+            el.classList.add('active'); 
+            el.style.display = 'block';
+        }
+        
+        function openProfile() { 
+            hideAllScreens(); 
+            let el = document.getElementById('profile-screen');
+            el.classList.add('active'); 
+            el.style.display = 'block';
+            document.getElementById('nav-profile').classList.add('active'); 
+        }
 
         function initMap() {
             myMap = new ymaps.Map("yandex-map", { center: [55.751244, 37.618423], zoom: 15, controls: ['zoomControl'] });
