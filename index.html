@@ -37,14 +37,15 @@
         .bg-blob-3 { bottom: 10%; left: 10%; width: 300px; height: 300px; background: #84fab0; animation: float 12s infinite alternate; }
         @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(20px, 20px) scale(1.1); } }
         
-        /* ЭКРАН ВХОДА */
-        #auth-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 80vh; }
+        /* Экран входа */
+        #auth-screen { display: none; flex-direction: column; justify-content: center; align-items: center; min-height: 80vh; }
         .auth-card { background: white; padding: 32px; border-radius: 32px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
         .auth-title { font-size: 32px; font-weight: 900; color: var(--accent); margin-bottom: 8px; }
         .auth-subtitle { color: var(--text-muted); margin-bottom: 24px; font-size: 14px; }
         .auth-input { width: 100%; padding: 16px; border-radius: 16px; border: 1px solid #ddd; background: #f2f4f7; font-size: 16px; margin-bottom: 12px; outline: none; font-family: inherit; }
         .auth-btn { width: 100%; padding: 16px; border-radius: 16px; border: none; background: var(--accent); color: white; font-weight: 700; font-size: 16px; cursor: pointer; margin-top: 8px; }
 
+        /* Общие стили */
         .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; background: var(--bg-glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); padding: 12px 16px; border-radius: 20px; border: 1px solid var(--border-glass); box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
         .user-info { display: flex; align-items: center; gap: 12px; }
         .avatar { width: 46px; height: 46px; background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; color: white; box-shadow: 0 4px 12px rgba(255, 117, 140, 0.4); }
@@ -91,7 +92,6 @@
         .category-sheet.open { bottom: 0; }
         .category-sheet h3 { margin: 0 0 16px 0; font-size: 18px; text-align: center; }
         .desc-input { width: 100%; padding: 14px; border-radius: 16px; border: 1px solid #ddd; background: #f2f4f7; font-size: 15px; margin-bottom: 16px; outline: none; font-family: inherit; }
-
         .category-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .category-item { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; border-radius: 16px; background: #f2f4f7; cursor: pointer; transition: 0.2s; }
         .category-item:active { transform: scale(0.95); }
@@ -147,28 +147,42 @@
         .post-text { font-size: 14px; line-height: 1.45; margin-bottom: 12px; }
         .post-actions { display: flex; gap: 16px; border-top: 1px solid #f0f0f0; padding-top: 12px; }
         .post-action { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-muted); cursor: pointer; transition: color 0.2s; }
-        
         .post-action.liked { color: #ff3b30; }
         .post-action.liked span { animation: pop 0.3s ease; }
-        @keyframes pop {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.4); }
-            100% { transform: scale(1); }
-        }
+        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.4); } 100% { transform: scale(1); } }
 
-        .create-post-btn { position: fixed; bottom: 100px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(88, 86, 214, 0.4); cursor: pointer; z-index: 150; display: none; }
+        .create-post-btn { position: fixed; bottom: 100px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: white; display: none; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(88, 86, 214, 0.4); cursor: pointer; z-index: 150; }
         .create-post-btn:active { transform: scale(0.9); }
         #post-file-input { display: none; }
         .post-preview { width: 100%; border-radius: 12px; margin-bottom: 12px; display: none; }
 
         .friend-item { display: flex; align-items: center; padding: 12px; background: white; border-radius: 16px; margin-bottom: 10px; border: 1px solid #eee; }
-        
         .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
         .search-box input { flex-grow: 1; padding: 14px; border-radius: 16px; border: 1px solid #ddd; background: #f2f4f7; font-size: 15px; outline: none; }
         .search-box button { padding: 0 20px; border-radius: 16px; border: none; background: var(--accent); color: white; font-weight: 700; cursor: pointer; }
-        
         .user-card { background: white; padding: 20px; border-radius: 20px; text-align: center; margin-top: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.05); display: none; }
         .user-card .avatar { width: 64px; height: 64px; font-size: 28px; margin: 0 auto 10px; border-radius: 50%; }
+
+        .logout-btn { background: #ffebee; color: #ff3b30; margin-top: 24px; justify-content: center; align-items: center; }
+
+        /* Комментарии */
+        .comments-section { margin-top: 12px; padding-top: 12px; border-top: 1px solid #eee; display: none; }
+        .comment-item { display: flex; gap: 10px; margin-bottom: 10px; }
+        .comment-bubble { background: #f2f4f7; padding: 8px 12px; border-radius: 12px; font-size: 13px; flex-grow: 1; }
+        .comment-author { font-weight: 700; font-size: 12px; margin-bottom: 2px; color: var(--accent); }
+        .comment-input-area { display: flex; gap: 8px; margin-top: 10px; }
+        .comment-input-area input { flex-grow: 1; padding: 10px; border-radius: 20px; border: 1px solid #ddd; background: #f2f4f7; font-size: 13px; outline: none; }
+        .comment-input-area button { background: var(--accent); color: white; border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+        /* Модалка выхода */
+        .custom-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; display: none; justify-content: center; align-items: center; padding: 20px; }
+        .modal-content { background: white; border-radius: 20px; padding: 24px; width: 100%; max-width: 300px; text-align: center; }
+        .modal-title { font-weight: 800; font-size: 18px; margin-bottom: 8px; }
+        .modal-text { color: var(--text-muted); font-size: 14px; margin-bottom: 20px; }
+        .modal-buttons { display: flex; gap: 10px; }
+        .modal-btn { flex: 1; padding: 12px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; }
+        .modal-cancel { background: #f2f4f7; color: var(--text-main); }
+        .modal-confirm { background: #ff3b30; color: white; }
     </style>
 </head>
 <body>
@@ -177,8 +191,20 @@
     <div class="bg-blob-2"></div>
     <div class="bg-blob-3"></div>
 
+    <!-- МОДАЛЬНОЕ ОКНО ВЫХОДА -->
+    <div id="logout-modal" class="custom-modal">
+        <div class="modal-content">
+            <div class="modal-title">Выход из аккаунта</div>
+            <div class="modal-text">Вы уверены, что хотите выйти? Все несохраненные данные будут потеряны.</div>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-cancel" onclick="closeLogoutModal()">Отмена</button>
+                <button class="modal-btn modal-confirm" onclick="confirmLogout()">Выйти</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ЭКРАН ВХОДА -->
-    <div id="auth-screen" style="display: none;">
+    <div id="auth-screen" class="screen">
         <div class="auth-card">
             <div class="auth-title">RAYON</div>
             <div class="auth-subtitle">Твой район, твои правила</div>
@@ -189,7 +215,7 @@
     </div>
 
     <!-- ГЛАВНЫЙ ЭКРАН -->
-    <div id="main-screen" class="screen" style="display: none;">
+    <div id="main-screen" class="screen">
         <div class="top-header">
             <div class="user-info">
                 <div class="avatar" id="user-avatar"></div>
@@ -365,6 +391,11 @@
             </div>
             <span class="material-symbols-rounded" style="color: var(--text-muted);">chevron_right</span>
         </div>
+
+        <div class="action-card logout-btn" onclick="openLogoutModal()">
+            <span class="material-symbols-rounded">logout</span>
+            <div class="action-text">Выйти из аккаунта</div>
+        </div>
     </div>
 
     <!-- МЕНЮ КАТЕГОРИЙ -->
@@ -473,23 +504,25 @@
             }
 
             localStorage.setItem('current_user_nick', login);
-            window.location.reload(); // Перезагрузка для чистого старта
+            window.location.reload(); 
+        }
+
+        function openLogoutModal() { document.getElementById('logout-modal').style.display = 'flex'; }
+        function closeLogoutModal() { document.getElementById('logout-modal').style.display = 'none'; }
+        function confirmLogout() {
+            localStorage.removeItem('current_user_nick');
+            window.location.reload();
         }
 
         // === ИНИЦИАЛИЗАЦИЯ ПРИ ЗАПУСКЕ ===
         window.onload = function() {
             if (currentUserNick && usersDB[currentUserNick]) {
-                // Пользователь уже вошел
                 userName = usersDB[currentUserNick].name;
                 
-                // Скрываем авторизацию
                 document.getElementById('auth-screen').style.display = 'none';
-                
-                // Показываем главный экран
                 document.getElementById('main-screen').style.display = 'block';
                 document.querySelector('.bottom-nav-wrapper').style.display = 'block';
                 
-                // Обновляем данные
                 document.getElementById('user-name').innerText = userName;
                 document.getElementById('user-avatar').innerText = userName.charAt(0).toUpperCase();
                 document.getElementById('profile-name').innerText = userName;
@@ -499,16 +532,14 @@
                 updateUI();
                 renderFeed();
             } else {
-                // Пользователь не вошел
                 document.getElementById('auth-screen').style.display = 'flex';
                 document.getElementById('main-screen').style.display = 'none';
                 document.querySelector('.bottom-nav-wrapper').style.display = 'none';
             }
         };
 
-        // === НАВИГАЦИЯ (ЖЕСТКАЯ) ===
+        // === НАВИГАЦИЯ ===
         function hideAllScreens() {
-            // Скрываем все экраны
             document.getElementById('main-screen').style.display = 'none';
             document.getElementById('feed-screen').style.display = 'none';
             document.getElementById('history-screen').style.display = 'none';
@@ -517,58 +548,21 @@
             document.getElementById('chats-screen').style.display = 'none';
             document.getElementById('profile-screen').style.display = 'none';
             
-            // Убираем активные классы с меню
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            
-            // Прячем кнопку создания поста
             document.getElementById('create-post-btn').style.display = 'none';
             
             closeChat();
         }
 
-        function openMain() { 
-            hideAllScreens(); 
-            document.getElementById('main-screen').style.display = 'block'; 
-            document.getElementById('nav-home').classList.add('active'); 
-        }
+        function openMain() { hideAllScreens(); document.getElementById('main-screen').style.display = 'block'; document.getElementById('nav-home').classList.add('active'); }
+        function openFeed() { hideAllScreens(); document.getElementById('feed-screen').style.display = 'block'; document.getElementById('nav-feed').classList.add('active'); document.getElementById('create-post-btn').style.display = 'flex'; renderFeed(); }
+        function openFriends() { hideAllScreens(); document.getElementById('friends-screen').style.display = 'block'; }
+        function openMap() { hideAllScreens(); document.getElementById('map-screen').style.display = 'block'; document.getElementById('nav-map').classList.add('active'); if (!mapInitialized) { ymaps.ready(function() { initMap(); mapInitialized = true; }); } }
+        function openChats() { hideAllScreens(); document.getElementById('chats-screen').style.display = 'block'; }
+        function openProfile() { hideAllScreens(); document.getElementById('profile-screen').style.display = 'block'; document.getElementById('nav-profile').classList.add('active'); }
+        function openHistory() { hideAllScreens(); document.getElementById('history-screen').style.display = 'block'; }
 
-        function openFeed() { 
-            hideAllScreens(); 
-            document.getElementById('feed-screen').style.display = 'block'; 
-            document.getElementById('nav-feed').classList.add('active'); 
-            document.getElementById('create-post-btn').style.display = 'flex'; 
-            renderFeed(); 
-        }
-        
-        function openFriends() { 
-            hideAllScreens(); 
-            document.getElementById('friends-screen').style.display = 'block'; 
-        }
-        
-        function openMap() { 
-            hideAllScreens(); 
-            document.getElementById('map-screen').style.display = 'block'; 
-            document.getElementById('nav-map').classList.add('active'); 
-            if (!mapInitialized) { ymaps.ready(function() { initMap(); mapInitialized = true; }); } 
-        }
-        
-        function openChats() { 
-            hideAllScreens(); 
-            document.getElementById('chats-screen').style.display = 'block'; 
-        }
-        
-        function openProfile() { 
-            hideAllScreens(); 
-            document.getElementById('profile-screen').style.display = 'block'; 
-            document.getElementById('nav-profile').classList.add('active'); 
-        }
-
-        function openHistory() { 
-            hideAllScreens(); 
-            document.getElementById('history-screen').style.display = 'block'; 
-        }
-
-        // === ОСТАЛЬНЫЕ ФУНКЦИИ (БЕЗ ИЗМЕНЕНИЙ) ===
+        // === ДРУЗЬЯ ===
         let foundUser = null;
         function searchFriendByNick() {
             let query = document.getElementById('search-nick').value.trim().replace('@', '').toLowerCase();
@@ -593,6 +587,7 @@
             document.getElementById('search-nick').value = '';
         }
 
+        // === ЛЕНТА ===
         function checkPostLimit() {
             let today = new Date().toDateString();
             let lastDate = localStorage.getItem('last_post_date');
@@ -610,8 +605,8 @@
         }
 
         let feedPosts = JSON.parse(localStorage.getItem('rayon_feed')) || [
-            { id: 1, author: 'Совет дома', text: 'В эту субботу в 10:00 состоится субботник!', image: null, likes: 12, time: 'Сегодня, 09:41', isMe: false, likedByMe: false },
-            { id: 2, author: 'Мария', text: 'Смотрите, какие красивые цветы расцвели у 3-го подъезда! 🌸', image: 'https://images.unsplash.com/photo-1490750967868-88cb44c3c70c?auto=format&fit=crop&w=500&q=60', likes: 24, time: 'Вчера, 18:20', isMe: false, likedByMe: false }
+            { id: 1, author: 'Совет дома', text: 'В эту субботу в 10:00 состоится субботник!', image: null, likes: 12, time: 'Сегодня, 09:41', isMe: false, likedByMe: false, comments: [] },
+            { id: 2, author: 'Мария', text: 'Смотрите, какие красивые цветы расцвели у 3-го подъезда! 🌸', image: 'https://images.unsplash.com/photo-1490750967868-88cb44c3c70c?auto=format&fit=crop&w=500&q=60', likes: 24, time: 'Вчера, 18:20', isMe: false, likedByMe: false, comments: [] }
         ];
 
         let editingPostId = null; 
@@ -626,6 +621,22 @@
                 let menuBtnHtml = post.isMe ? `<span class="material-symbols-rounded post-menu-btn" onclick="openPostActions(${post.id})">more_vert</span>` : '';
                 let likeClass = post.likedByMe ? 'liked' : '';
                 let likeIcon = post.likedByMe ? 'favorite' : 'favorite_border';
+                
+                // Отрисовка комментариев
+                let commentsHtml = '';
+                if (post.comments && post.comments.length > 0) {
+                    post.comments.forEach(c => {
+                        commentsHtml += `
+                            <div class="comment-item">
+                                <div class="comment-bubble">
+                                    <div class="comment-author">${c.author}</div>
+                                    ${c.text}
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+
                 container.innerHTML += `
                     <div class="feed-post">
                         <div class="post-header">
@@ -642,13 +653,50 @@
                             <div class="post-action ${likeClass}" onclick="toggleLike(${post.id})">
                                 <span class="material-symbols-rounded" style="font-size: 18px;">${likeIcon}</span> ${post.likes}
                             </div>
-                            <div class="post-action">
-                                <span class="material-symbols-rounded" style="font-size: 18px;">chat_bubble</span> Комментировать
+                            <div class="post-action" onclick="toggleComments(${post.id})">
+                                <span class="material-symbols-rounded" style="font-size: 18px;">chat_bubble</span> ${post.comments ? post.comments.length : 0}
+                            </div>
+                        </div>
+                        <div class="comments-section" id="comments-${post.id}">
+                            ${commentsHtml}
+                            <div class="comment-input-area">
+                                <input type="text" id="comment-input-${post.id}" placeholder="Написать комментарий...">
+                                <button onclick="addComment(${post.id})">
+                                    <span class="material-symbols-rounded" style="color: white; font-size: 20px;">send</span>
+                                </button>
                             </div>
                         </div>
                     </div>
                 `;
             });
+        }
+
+        function toggleComments(id) {
+            let section = document.getElementById(`comments-${id}`);
+            if (section.style.display === 'none' || section.style.display === '') {
+                section.style.display = 'block';
+            } else {
+                section.style.display = 'none';
+            }
+        }
+
+        function addComment(id) {
+            let input = document.getElementById(`comment-input-${id}`);
+            let text = input.value.trim();
+            if (!text) return;
+
+            let post = feedPosts.find(p => p.id === id);
+            if (post) {
+                if (!post.comments) post.comments = [];
+                post.comments.push({ author: userName, text: text });
+                localStorage.setItem('rayon_feed', JSON.stringify(feedPosts));
+                input.value = '';
+                renderFeed();
+                // Оставляем секцию комментариев открытой после перерисовки
+                setTimeout(() => {
+                    document.getElementById(`comments-${id}`).style.display = 'block';
+                }, 50);
+            }
         }
 
         function toggleLike(id) {
@@ -744,7 +792,7 @@
                 if (post) { post.text = text; post.image = postImageData; post.time = timeStr; }
                 tg.showAlert("Пост обновлен!");
             } else {
-                let newPost = { id: Date.now(), author: userName, text: text, image: postImageData, likes: 0, time: timeStr, isMe: true, likedByMe: false };
+                let newPost = { id: Date.now(), author: userName, text: text, image: postImageData, likes: 0, time: timeStr, isMe: true, likedByMe: false, comments: [] };
                 feedPosts.unshift(newPost);
                 updateScore(5, "Новый пост в Пульсе");
                 incrementPostCount();
@@ -755,6 +803,7 @@
             renderFeed();
         }
 
+        // === БАЛЛЫ ===
         function changeProfileBg(event) {
             let file = event.target.files[0];
             if (!file) return;
@@ -834,6 +883,7 @@
             closeGiftSheet();
         }
 
+        // === КАРТА ===
         let myMap;
         let mapInitialized = false;
         let tempCoords = null; 
@@ -888,6 +938,7 @@
             myMap.geoObjects.add(new ymaps.Placemark(coords, { hintContent: title, balloonContentHeader: title, balloonContentBody: desc }, { iconLayout: 'default#imageWithContent', iconImageHref: 'https://yandex.ru/images/template/clear.png', iconImageSize: [46, 46], iconImageOffset: [-23, -46], iconContentOffset: [0, 0], iconContentLayout: ymaps.templateLayoutFactory.createClass(htmlLayout) }));
         }
 
+        // === ЧАТЫ ===
         let currentChatId = null;
         let chatHistory = { 'user_2': [{ sender: 'user_2', text: 'Привет! Выйдешь на субботник?', time: '10:45' }] };
 
