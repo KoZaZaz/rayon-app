@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RAYON - Мой район</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Подключаем Яндекс.Карты (без API-ключа, в тестовом режиме) -->
-    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+    <!-- Подключаем Яндекс.Карты с твоим API-ключом -->
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=b91b8274-1abf-4c6f-abe0-969e6d16b55e" type="text/javascript"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0');
@@ -93,7 +93,7 @@
         .add-btn { position: absolute; bottom: 16px; right: 16px; background: var(--accent); color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(88, 86, 214, 0.4); cursor: pointer; z-index: 10; transition: 0.2s; }
         .add-btn:active { transform: scale(0.9); }
 
-        /* Меню выбора категории (Bottom Sheet) */
+        /* Меню выбора категории */
         .category-sheet { position: fixed; bottom: -100%; left: 0; right: 0; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-radius: 24px 24px 0 0; padding: 24px; box-shadow: 0 -10px 30px rgba(0,0,0,0.1); transition: bottom 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 200; }
         .category-sheet.open { bottom: 0; }
         .category-sheet h3 { margin: 0 0 16px 0; font-size: 18px; text-align: center; }
@@ -103,7 +103,6 @@
         .category-item .material-symbols-rounded { font-size: 32px; margin-bottom: 8px; }
         .category-item span:last-child { font-weight: 600; font-size: 13px; }
         
-        /* Цвета для категорий */
         .cat-repair { color: #ff3b30; background: #ffebee; }
         .cat-eco { color: #34c759; background: #e8f5e9; }
         .cat-help { color: #ff9500; background: #fff3cd; }
@@ -184,7 +183,6 @@
         <div id="yandex-map" style="width: 100%; height: 100%;"></div>
         <div onclick="openMain()" class="back-btn">← Назад</div>
         
-        <!-- Кнопка добавления -->
         <div onclick="showCategorySheet()" class="add-btn">
             <span class="material-symbols-rounded">add_location_alt</span>
         </div>
@@ -238,7 +236,7 @@
         tg.expand();
         tg.setHeaderColor('#f2f4f7');
 
-        // 1. Получение имени
+        // Получение имени
         let userName = tg.initDataUnsafe?.user?.first_name;
         if (userName) {
             document.getElementById('user-name').innerText = userName;
@@ -252,12 +250,11 @@
         // --- ЛОГИКА КАРТЫ ---
         let myMap;
         let mapInitialized = false;
-        let pendingCoords = null; // Координаты, куда ставить метку
+        let pendingCoords = null;
 
         function openMap() {
             document.getElementById('main-screen').style.display = 'none';
             document.getElementById('map-screen').style.display = 'block';
-            
             document.getElementById('nav-home').classList.remove('active');
             document.getElementById('nav-map').classList.add('active');
 
@@ -270,15 +267,13 @@
         function openMain() {
             document.getElementById('main-screen').style.display = 'block';
             document.getElementById('map-screen').style.display = 'none';
-            
             document.getElementById('nav-map').classList.remove('active');
             document.getElementById('nav-home').classList.add('active');
         }
 
-        // Инициализация карты (БЕЗ ОШИБКИ ГЕОЛОКАЦИИ)
         function initMap() {
             myMap = new ymaps.Map("yandex-map", {
-                center: [55.751244, 37.618423], // Центр Москвы
+                center: [55.751244, 37.618423],
                 zoom: 15,
                 controls: ['zoomControl']
             });
@@ -287,29 +282,25 @@
             addMarkerToMap([55.751, 37.618], 'repair', 'Сломанная лавочка', 'В работе');
             addMarkerToMap([55.753, 37.621], 'eco', 'Фандомат', 'Сюда можно сдать пластик');
 
-            // Клик по карте (запоминаем координаты и открываем меню)
+            // Клик по карте
             myMap.events.add('click', function (e) {
                 pendingCoords = e.get('coords');
                 showCategorySheet();
             });
         }
 
-        // Показ меню выбора категории
         function showCategorySheet() {
-            // Если нажали на кнопку "+", а не на карту, берем центр экрана
             if (!pendingCoords) {
                 pendingCoords = myMap.getCenter();
             }
             document.getElementById('category-sheet').classList.add('open');
         }
 
-        // Скрытие меню
         function hideCategorySheet() {
             document.getElementById('category-sheet').classList.remove('open');
             pendingCoords = null;
         }
 
-        // Выбор категории и добавление метки
         function selectCategory(type) {
             hideCategorySheet();
             if (!pendingCoords) return;
@@ -322,29 +313,33 @@
 
             addMarkerToMap(pendingCoords, type, title, desc);
             
-            // Вибрация
             tg.HapticFeedback.impactOccurred('medium');
             tg.showAlert('📍 Метка добавлена!');
             pendingCoords = null;
         }
 
-        // Универсальная функция добавления метки с иконкой
+        // Универсальная функция добавления метки
         function addMarkerToMap(coords, type, title, desc) {
             let iconHref = '';
-            if (type === 'repair') iconHref = 'https://img.icons8.com/color/48/000000/maintenance.png';
-            if (type === 'eco') iconHref = 'https://img.icons8.com/color/48/000000/recycle-sign.png';
-            if (type === 'help') iconHref = 'https://img.icons8.com/color/48/000000/helping-hand.png';
-            if (type === 'security') iconHref = 'https://img.icons8.com/color/48/000000/shield.png';
+            let presetIcon = 'islands#blueIcon'; // Запасная иконка, если картинка не загрузится
+
+            if (type === 'repair') { iconHref = 'https://img.icons8.com/color/48/000000/maintenance.png'; presetIcon = 'islands#redIcon'; }
+            if (type === 'eco') { iconHref = 'https://img.icons8.com/color/48/000000/recycle-sign.png'; presetIcon = 'islands#greenIcon'; }
+            if (type === 'help') { iconHref = 'https://img.icons8.com/color/48/000000/helping-hand.png'; presetIcon = 'islands#orangeIcon'; }
+            if (type === 'security') { iconHref = 'https://img.icons8.com/color/48/000000/shield.png'; presetIcon = 'islands#blueIcon'; }
 
             var placemark = new ymaps.Placemark(coords, {
                 hintContent: title,
                 balloonContent: desc
             }, { 
-                iconLayout: 'default#image',
+                iconLayout: 'default#imageWithContent',
                 iconImageHref: iconHref,
                 iconImageSize: [40, 40],
                 iconImageOffset: [-20, -40]
             });
+            
+            // Если картинка не загрузится, Яндекс автоматически поставит стандартную метку из presetIcon
+            
             myMap.geoObjects.add(placemark);
         }
     </script>
