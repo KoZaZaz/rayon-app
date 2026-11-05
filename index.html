@@ -68,7 +68,7 @@
         
         .bottom-nav-wrapper { position: fixed; bottom: 20px; left: 16px; right: 16px; z-index: 100; }
         .bottom-nav { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--border-glass); display: flex; justify-content: space-around; padding: 12px 8px; border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
-        .nav-item { text-align: center; font-size: 11px; font-weight: 600; color: var(--text-muted); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: 0.2s; }
+        .nav-item { text-align: center; font-size: 11px; font-weight: 600; color: var(--text-muted); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: 0.2s; width: 25%; }
         .nav-item span.material-symbols-rounded { transition: 0.2s; opacity: 0.6; }
         .nav-item.active { color: var(--accent); }
         .nav-item.active span.material-symbols-rounded { transform: translateY(-2px) scale(1.1); opacity: 1; color: var(--accent); }
@@ -132,7 +132,6 @@
         .profile-header-card > * { position: relative; z-index: 1; }
         #file-input { display: none; }
 
-        /* СТИЛИ ДЛЯ ЛЕНТЫ */
         .feed-post { background: white; border-radius: 20px; padding: 16px; margin-bottom: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.03); }
         .post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
         .post-author { font-weight: 700; font-size: 14px; }
@@ -141,9 +140,7 @@
         .post-text { font-size: 14px; line-height: 1.45; margin-bottom: 12px; }
         .post-actions { display: flex; gap: 16px; border-top: 1px solid #f0f0f0; padding-top: 12px; }
         .post-action { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-muted); cursor: pointer; }
-        .post-action.active { color: #ff3b30; }
         
-        /* Создание поста */
         .create-post-btn { position: fixed; bottom: 100px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(88, 86, 214, 0.4); cursor: pointer; z-index: 150; }
         .create-post-btn:active { transform: scale(0.9); }
         #post-file-input { display: none; }
@@ -196,9 +193,9 @@
                 <div class="action-icon icon-cam"><span class="material-symbols-rounded">photo_camera</span></div>
                 <div class="action-text">Сообщить о проблеме</div>
             </div>
-            <div class="action-card" onclick="tg.showAlert('Список соседей!')">
-                <div class="action-icon icon-help"><span class="material-symbols-rounded">group</span></div>
-                <div class="action-text">Помощь соседям</div>
+            <div class="action-card" onclick="openChats()">
+                <div class="action-icon icon-help"><span class="material-symbols-rounded">forum</span></div>
+                <div class="action-text">Чаты соседей</div>
             </div>
             <div class="action-card" onclick="tg.showAlert('Магазин скидок!')">
                 <div class="action-icon icon-gift"><span class="material-symbols-rounded">redeem</span></div>
@@ -207,9 +204,9 @@
         </div>
     </div> 
 
-    <!-- ЭКРАН ЛЕНТЫ -->
+    <!-- ЭКРАН ПУЛЬСА (Бывшая Лента) -->
     <div id="feed-screen" class="screen">
-        <div class="section-title">Лента района</div>
+        <div class="section-title">Пульс района</div>
         <div id="feed-container"></div>
     </div>
 
@@ -334,11 +331,11 @@
     <div id="create-post-sheet" class="category-sheet">
         <h3>Новый пост</h3>
         <input type="text" id="post-text-input" class="desc-input" placeholder="Что нового во дворе?">
-        <input type="file" id="post-file-input" accept="image/*" onchange="previewPostImage(event)">
+        <input type="file" id="post-file-input" accept="image/*, video/*" onchange="previewPostImage(event)">
         <img id="post-image-preview" class="post-preview">
         <div style="display: flex; gap: 10px; margin-bottom: 16px;">
             <button onclick="document.getElementById('post-file-input').click()" style="flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #ddd; background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                <span class="material-symbols-rounded">add_photo_alternate</span> Фото
+                <span class="material-symbols-rounded">add_photo_alternate</span> Фото/Видео
             </button>
         </div>
         <button onclick="publishPost()" style="width: 100%; padding: 16px; border-radius: 16px; border: none; background: var(--accent); color: white; font-weight: 700; font-size: 16px; cursor: pointer;">Опубликовать</button>
@@ -349,21 +346,22 @@
     <div class="bottom-nav-wrapper">
         <div class="bottom-nav">
             <div class="nav-item active" id="nav-home" onclick="openMain()">
-                <span class="material-symbols-rounded">home</span> Главная
+                <span class="material-symbols-rounded">home</span>
             </div>
+            <!-- Новая иконка "Пульс" по центру -->
             <div class="nav-item" id="nav-feed" onclick="openFeed()">
-                <span class="material-symbols-rounded">dynamic_feed</span> Лента
+                <span class="material-symbols-rounded">graphic_eq</span>
             </div>
             <div class="nav-item" id="nav-map" onclick="openMap()">
-                <span class="material-symbols-rounded">location_on</span> Карта
+                <span class="material-symbols-rounded">location_on</span>
             </div>
             <div class="nav-item" id="nav-profile" onclick="openProfile()">
-                <span class="material-symbols-rounded">person</span> Профиль
+                <span class="material-symbols-rounded">person</span>
             </div>
         </div>
     </div>
 
-    <!-- Плавающая кнопка создания поста (видна только в ленте) -->
+    <!-- Плавающая кнопка создания поста -->
     <div id="create-post-btn" class="create-post-btn" style="display: none;" onclick="openCreatePostSheet()">
         <span class="material-symbols-rounded">add</span>
     </div>
@@ -380,7 +378,7 @@
         document.getElementById('profile-name').innerText = userName;
         document.getElementById('profile-avatar').innerText = userName.charAt(0).toUpperCase();
 
-        // === ЛЕНТА ===
+        // === ПУЛЬС (ЛЕНТА) ===
         let feedPosts = JSON.parse(localStorage.getItem('rayon_feed')) || [
             { id: 1, author: 'Совет дома', text: 'В эту субботу в 10:00 состоится субботник! Выходим чистить двор. За участие дадим по 100 баллов.', image: null, likes: 12, time: 'Сегодня, 09:41' },
             { id: 2, author: 'Мария', text: 'Смотрите, какие красивые цветы расцвели у 3-го подъезда! 🌸', image: 'https://images.unsplash.com/photo-1490750967868-88cb44c3c70c?auto=format&fit=crop&w=500&q=60', likes: 24, time: 'Вчера, 18:20' }
@@ -425,12 +423,8 @@
             }
         }
 
-        // Создание поста
         let postImageData = null;
-
-        function openCreatePostSheet() {
-            document.getElementById('create-post-sheet').classList.add('open');
-        }
+        function openCreatePostSheet() { document.getElementById('create-post-sheet').classList.add('open'); }
         function closeCreatePostSheet() {
             document.getElementById('create-post-sheet').classList.remove('open');
             document.getElementById('post-text-input').value = '';
@@ -441,6 +435,13 @@
         function previewPostImage(event) {
             let file = event.target.files[0];
             if (!file) return;
+            
+            // Проверка на видео (пока просто выводим сообщение)
+            if (file.type.startsWith('video/')) {
+                tg.showAlert("Видео можно будет добавлять после подключения сервера. Пока выберите фото.");
+                return;
+            }
+
             let reader = new FileReader();
             reader.onload = function(e) {
                 postImageData = e.target.result;
@@ -473,10 +474,10 @@
             closeCreatePostSheet();
             renderFeed();
             tg.showAlert("Пост опубликован! +10 баллов");
-            updateScore(10, "Новый пост в ленте");
+            updateScore(10, "Новый пост в Пульсе");
         }
 
-        // === ОСТАЛЬНАЯ ЛОГИКА (карта, баллы, чаты и т.д.) ===
+        // === БАЛЛЫ ===
         function changeProfileBg(event) {
             let file = event.target.files[0];
             if (!file) return;
@@ -559,6 +560,7 @@
         updateUI();
         renderFeed();
 
+        // === НАВИГАЦИЯ ===
         let myMap;
         let mapInitialized = false;
         let tempCoords = null; 
@@ -591,6 +593,12 @@
             if (!mapInitialized) { ymaps.ready(function() { initMap(); mapInitialized = true; }); }
         }
 
+        function openChats() {
+            hideAllScreens();
+            document.getElementById('chats-screen').classList.add('active');
+            // Чаты теперь не в нижнем меню, поэтому просто показываем экран
+        }
+
         function openProfile() {
             hideAllScreens();
             document.getElementById('profile-screen').classList.add('active');
@@ -599,7 +607,7 @@
 
         function initMap() {
             myMap = new ymaps.Map("yandex-map", { center: [55.751244, 37.618423], zoom: 15, controls: ['zoomControl'] });
-            addMarkerToMap([55.751, 37.618], 'repair', 'Сломанная лавочка', 'Спинка сломана, сидеть невозможно.');
+            addMarkerToMap([55.751, 37.618], 'repair', 'Сломанная лавочка', 'Спинка сломана.');
             addMarkerToMap([55.753, 37.621], 'eco', 'Фандомат', 'Сюда можно сдать пластик.');
             myMap.events.add('click', function (e) {
                 tempCoords = e.get('coords');
