@@ -67,9 +67,6 @@
         .feed-content { flex-grow: 1; }
         .feed-text { font-size: 14px; line-height: 1.45; margin-bottom: 8px; color: #2c2c2e; }
         .feed-time { font-size: 12px; color: var(--text-muted); font-weight: 500; display: flex; align-items: center; gap: 8px; }
-        .badge { padding: 4px 8px; border-radius: 8px; font-size: 11px; font-weight: 700; }
-        .badge-work { background: #fff3cd; color: #d97706; }
-        .badge-done { background: #d1fae5; color: #059669; }
         
         .bottom-nav-wrapper { position: fixed; bottom: 20px; left: 16px; right: 16px; z-index: 100; }
         .bottom-nav { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--border-glass); display: flex; justify-content: space-around; padding: 12px 8px; border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
@@ -80,6 +77,7 @@
         
         .map-container { display: none; height: 75vh; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.1); position: relative; }
         .back-btn { position: absolute; top: 16px; left: 16px; background: white; padding: 8px 16px; border-radius: 20px; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.2); cursor: pointer; z-index: 10; }
+        
         .add-btn { position: absolute; bottom: 16px; right: 16px; background: var(--accent); color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(88, 86, 214, 0.4); cursor: pointer; z-index: 10; transition: 0.2s; }
         .add-btn:active { transform: scale(0.9); }
 
@@ -97,6 +95,24 @@
         .cat-help { color: #ff9500; background: #fff3cd; }
         .cat-security { color: #007aff; background: #e5f0ff; }
         .close-sheet { text-align: center; color: #8e8e93; font-weight: 600; margin-top: 16px; cursor: pointer; }
+
+        /* === СТИЛИ ДЛЯ НАШИХ КАСТОМНЫХ МЕТОК === */
+        .custom-marker {
+            width: 40px;
+            height: 40px;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            border: 3px solid white;
+        }
+        .custom-marker span {
+            transform: rotate(45deg); /* Возвращаем иконку в нормальное положение */
+            color: white;
+            font-size: 20px;
+        }
     </style>
 </head>
 <body>
@@ -140,7 +156,7 @@
                 <div class="action-icon icon-map"><span class="material-symbols-rounded">map</span></div>
                 <div class="action-text">Карта района</div>
             </div>
-            <div class="action-card" onclick="addMarkerAtCenter()">
+            <div class="action-card" onclick="openMap(); addMarkerAtCenter();">
                 <div class="action-icon icon-cam"><span class="material-symbols-rounded">photo_camera</span></div>
                 <div class="action-text">Сообщить о проблеме</div>
             </div>
@@ -262,18 +278,16 @@
                 controls: ['zoomControl']
             });
 
-            // Стартовые метки
+            // Добавляем тестовые метки с новым дизайном
             addMarkerToMap([55.751, 37.618], 'repair', 'Сломанная лавочка', 'В работе');
             addMarkerToMap([55.753, 37.621], 'eco', 'Фандомат', 'Сюда можно сдать пластик');
 
-            // Клик по карте: сразу ставим метку и открываем меню
             myMap.events.add('click', function (e) {
                 tempCoords = e.get('coords');
                 document.getElementById('category-sheet').classList.add('open');
             });
         }
 
-        // Функция для кнопки "+" (ставит метку в центре)
         function addMarkerAtCenter() {
             if (!myMap) return;
             tempCoords = myMap.getCenter();
@@ -288,10 +302,7 @@
         function selectCategory(type) {
             document.getElementById('category-sheet').classList.remove('open');
             
-            if (!tempCoords) {
-                tg.showAlert("Ошибка: координаты не сохранились");
-                return;
-            }
+            if (!tempCoords) return;
 
             let title, desc;
             if (type === 'repair') { title = 'Проблема (Ремонт)'; desc = 'Нужен ремонт.'; }
@@ -299,28 +310,38 @@
             if (type === 'help') { title = 'Нужна помощь'; desc = 'Требуется помощь.'; }
             if (type === 'security') { title = 'Безопасность'; desc = 'Вопрос безопасности.'; }
 
-            // Ставим метку
             addMarkerToMap(tempCoords, type, title, desc);
-            
-            // Показываем сообщение об успехе
             tg.showAlert("📍 Метка добавлена!");
-            
-            // Сбрасываем координаты
             tempCoords = null;
         }
 
-        // Функция добавления метки (используем стандартные капли Яндекса)
+        // === НОВАЯ ФУНКЦИЯ С КРАСИВЫМ ДИЗАЙНОМ ===
         function addMarkerToMap(coords, type, title, desc) {
-            let color = 'red';
-            if (type === 'eco') color = 'green';
-            if (type === 'help') color = 'orange';
-            if (type === 'security') color = 'blue';
+            let color = '#ff3b30'; // Ремонт (красный)
+            let icon = 'build';
+
+            if (type === 'eco') { color = '#34c759'; icon = 'eco'; } // Экология (зеленый)
+            if (type === 'help') { color = '#ff9500'; icon = 'volunteer_activism'; } // Помощь (оранжевый)
+            if (type === 'security') { color = '#007aff'; icon = 'shield'; } // Безопасность (синий)
+
+            // Генерируем HTML для маркера (стилизованная капля)
+            let htmlLayout = `
+                <div class="custom-marker" style="background-color: ${color};">
+                    <span class="material-symbols-rounded">${icon}</span>
+                </div>
+            `;
 
             var placemark = new ymaps.Placemark(coords, {
                 hintContent: title,
                 balloonContent: desc
             }, { 
-                preset: 'islands#' + color + 'Icon'
+                iconLayout: 'default#imageWithContent',
+                // Прозрачная заглушка вместо картинки
+                iconImageHref: 'https://yandex.ru/images/template/clear.png',
+                iconImageSize: [40, 40],
+                iconImageOffset: [-20, -40], // Сдвиг, чтобы низ капли указывал на точку
+                iconContentOffset: [0, 0],
+                iconContentLayout: ymaps.templateLayoutFactory.createClass(htmlLayout)
             });
             
             myMap.geoObjects.add(placemark);
