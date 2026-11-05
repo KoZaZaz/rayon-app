@@ -66,12 +66,6 @@
         .icon-gift { background: #e8f5e9; color: #34c759; }
         .action-text { font-weight: 700; font-size: 15px; }
         
-        .feed-card { background: var(--bg-glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--border-glass); border-radius: 20px; padding: 16px; margin-bottom: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.02); display: flex; gap: 14px; cursor: pointer; }
-        .feed-icon { width: 44px; height: 44px; min-width: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
-        .feed-content { flex-grow: 1; }
-        .feed-text { font-size: 14px; line-height: 1.45; margin-bottom: 8px; color: #2c2c2e; }
-        .feed-time { font-size: 12px; color: var(--text-muted); font-weight: 500; display: flex; align-items: center; gap: 8px; }
-        
         .bottom-nav-wrapper { position: fixed; bottom: 20px; left: 16px; right: 16px; z-index: 100; }
         .bottom-nav { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--border-glass); display: flex; justify-content: space-around; padding: 12px 8px; border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
         .nav-item { text-align: center; font-size: 11px; font-weight: 600; color: var(--text-muted); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: 0.2s; }
@@ -133,31 +127,27 @@
         .amount-plus { color: #34c759; }
         .amount-minus { color: #ff3b30; }
 
-        /* КАСТОМИЗАЦИЯ ПРОФИЛЯ */
-        .profile-header-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 24px;
-            border-radius: 24px;
-            position: relative;
-            overflow: hidden;
-            background-size: cover;
-            background-position: center;
-        }
-        .profile-header-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.4); /* Затемнение для читаемости текста */
-            z-index: 0;
-        }
-        .profile-header-card > * {
-            position: relative;
-            z-index: 1;
-        }
-        /* Скрытый инпут для выбора файла */
+        .profile-header-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 24px; border-radius: 24px; position: relative; overflow: hidden; background-size: cover; background-position: center; }
+        .profile-header-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 0; }
+        .profile-header-card > * { position: relative; z-index: 1; }
         #file-input { display: none; }
+
+        /* СТИЛИ ДЛЯ ЛЕНТЫ */
+        .feed-post { background: white; border-radius: 20px; padding: 16px; margin-bottom: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.03); }
+        .post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+        .post-author { font-weight: 700; font-size: 14px; }
+        .post-time { font-size: 11px; color: var(--text-muted); }
+        .post-image { width: 100%; border-radius: 12px; margin-bottom: 12px; max-height: 300px; object-fit: cover; }
+        .post-text { font-size: 14px; line-height: 1.45; margin-bottom: 12px; }
+        .post-actions { display: flex; gap: 16px; border-top: 1px solid #f0f0f0; padding-top: 12px; }
+        .post-action { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-muted); cursor: pointer; }
+        .post-action.active { color: #ff3b30; }
+        
+        /* Создание поста */
+        .create-post-btn { position: fixed; bottom: 100px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(88, 86, 214, 0.4); cursor: pointer; z-index: 150; }
+        .create-post-btn:active { transform: scale(0.9); }
+        #post-file-input { display: none; }
+        .post-preview { width: 100%; border-radius: 12px; margin-bottom: 12px; display: none; }
     </style>
 </head>
 <body>
@@ -215,16 +205,13 @@
                 <div class="action-text">Тратить баллы</div>
             </div>
         </div>
-
-        <div class="section-title">Лента района <span>Все</span></div>
-        <div class="feed-card">
-            <div class="feed-icon" style="background:#e5f0ff; color:#007aff;"><span class="material-symbols-rounded">campaign</span></div>
-            <div class="feed-content">
-                <div class="feed-text"><b>Совет дома:</b> В эту субботу в 10:00 состоится субботник. Выходим чистить двор! За участие дадим по 100 баллов.</div>
-                <div class="feed-time">Сегодня, 09:41</div>
-            </div>
-        </div>
     </div> 
+
+    <!-- ЭКРАН ЛЕНТЫ -->
+    <div id="feed-screen" class="screen">
+        <div class="section-title">Лента района</div>
+        <div id="feed-container"></div>
+    </div>
 
     <!-- ЭКРАН ИСТОРИИ БАЛЛОВ -->
     <div id="history-screen" class="screen">
@@ -283,8 +270,6 @@
     <!-- ЭКРАН ПРОФИЛЯ -->
     <div id="profile-screen" class="screen">
         <div class="section-title">Мой профиль</div>
-        
-        <!-- Карточка профиля с возможностью смены фона -->
         <div class="profile-header-card" id="profile-card">
             <div style="display: flex; align-items: center; gap: 16px;">
                 <div class="avatar" id="profile-avatar" style="width: 64px; height: 64px; font-size: 28px; border-radius: 20px; background: rgba(255,255,255,0.2); box-shadow: none;"></div>
@@ -304,7 +289,6 @@
             </div>
         </div>
 
-        <!-- Кнопка смены фона -->
         <input type="file" id="file-input" accept="image/*" onchange="changeProfileBg(event)">
         <div class="action-card" style="margin-top: 16px; flex-direction: row; align-items: center; justify-content: space-between;" onclick="document.getElementById('file-input').click()">
             <div style="display: flex; align-items: center; gap: 12px;">
@@ -314,29 +298,12 @@
             <span class="material-symbols-rounded" style="color: var(--text-muted);">chevron_right</span>
         </div>
         
-        <!-- Кнопка подарить баллы -->
         <div class="action-card" style="margin-top: 8px; flex-direction: row; align-items: center; justify-content: space-between;" onclick="openGiftSheet()">
             <div style="display: flex; align-items: center; gap: 12px;">
                 <div class="action-icon" style="background: #fff3cd; color: #ff9500;"><span class="material-symbols-rounded">card_giftcard</span></div>
                 <div class="action-text">Подарить баллы соседу</div>
             </div>
             <span class="material-symbols-rounded" style="color: var(--text-muted);">chevron_right</span>
-        </div>
-
-        <div class="section-title" style="font-size: 18px; margin-top: 24px;">Моя статистика</div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
-            <div class="action-card" style="text-align: center; padding: 12px; gap: 4px;">
-                <div style="font-size: 24px; font-weight: 800; color: var(--accent);" id="stat-problems">0</div>
-                <div style="font-size: 11px; color: var(--text-muted);">Проблем</div>
-            </div>
-            <div class="action-card" style="text-align: center; padding: 12px; gap: 4px;">
-                <div style="font-size: 24px; font-weight: 800; color: #34c759;">0</div>
-                <div style="font-size: 11px; color: var(--text-muted);">Помощи</div>
-            </div>
-            <div class="action-card" style="text-align: center; padding: 12px; gap: 4px;">
-                <div style="font-size: 24px; font-weight: 800; color: #ff9500;">0</div>
-                <div style="font-size: 11px; color: var(--text-muted);">Деревьев</div>
-            </div>
         </div>
     </div>
 
@@ -353,14 +320,29 @@
         <div class="close-sheet" onclick="hideCategorySheet()">Отмена</div>
     </div>
 
-    <!-- МЕНЮ ПОДАРКА БАЛЛОВ -->
+    <!-- МЕНЮ ПОДАРКА -->
     <div id="gift-sheet" class="category-sheet">
         <h3>Подарить баллы соседу</h3>
         <p style="font-size: 13px; color: var(--text-muted); text-align: center; margin-bottom: 16px;">Лимит: 100 баллов в день</p>
-        <input type="number" id="gift-amount" class="desc-input" placeholder="Сколько баллов подарить? (макс. 100)" min="1" max="100">
-        <input type="text" id="gift-reason" class="desc-input" placeholder="За что? (например: 'Спасибо за дрель')">
-        <button onclick="sendGift()" style="width: 100%; padding: 16px; border-radius: 16px; border: none; background: var(--accent); color: white; font-weight: 700; font-size: 16px; cursor: pointer;">Отправить подарок</button>
+        <input type="number" id="gift-amount" class="desc-input" placeholder="Сколько баллов?" min="1" max="100">
+        <input type="text" id="gift-reason" class="desc-input" placeholder="За что?">
+        <button onclick="sendGift()" style="width: 100%; padding: 16px; border-radius: 16px; border: none; background: var(--accent); color: white; font-weight: 700; font-size: 16px; cursor: pointer;">Отправить</button>
         <div class="close-sheet" onclick="closeGiftSheet()">Отмена</div>
+    </div>
+
+    <!-- МЕНЮ СОЗДАНИЯ ПОСТА -->
+    <div id="create-post-sheet" class="category-sheet">
+        <h3>Новый пост</h3>
+        <input type="text" id="post-text-input" class="desc-input" placeholder="Что нового во дворе?">
+        <input type="file" id="post-file-input" accept="image/*" onchange="previewPostImage(event)">
+        <img id="post-image-preview" class="post-preview">
+        <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+            <button onclick="document.getElementById('post-file-input').click()" style="flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #ddd; background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <span class="material-symbols-rounded">add_photo_alternate</span> Фото
+            </button>
+        </div>
+        <button onclick="publishPost()" style="width: 100%; padding: 16px; border-radius: 16px; border: none; background: var(--accent); color: white; font-weight: 700; font-size: 16px; cursor: pointer;">Опубликовать</button>
+        <div class="close-sheet" onclick="closeCreatePostSheet()">Отмена</div>
     </div>
 
     <!-- НИЖНЕЕ МЕНЮ -->
@@ -369,16 +351,21 @@
             <div class="nav-item active" id="nav-home" onclick="openMain()">
                 <span class="material-symbols-rounded">home</span> Главная
             </div>
+            <div class="nav-item" id="nav-feed" onclick="openFeed()">
+                <span class="material-symbols-rounded">dynamic_feed</span> Лента
+            </div>
             <div class="nav-item" id="nav-map" onclick="openMap()">
                 <span class="material-symbols-rounded">location_on</span> Карта
-            </div>
-            <div class="nav-item" id="nav-chats" onclick="openChats()">
-                <span class="material-symbols-rounded">chat</span> Чаты
             </div>
             <div class="nav-item" id="nav-profile" onclick="openProfile()">
                 <span class="material-symbols-rounded">person</span> Профиль
             </div>
         </div>
+    </div>
+
+    <!-- Плавающая кнопка создания поста (видна только в ленте) -->
+    <div id="create-post-btn" class="create-post-btn" style="display: none;" onclick="openCreatePostSheet()">
+        <span class="material-symbols-rounded">add</span>
     </div>
 
     <script>
@@ -393,131 +380,184 @@
         document.getElementById('profile-name').innerText = userName;
         document.getElementById('profile-avatar').innerText = userName.charAt(0).toUpperCase();
 
-        // === СМЕНА ФОНА ПРОФИЛЯ ===
+        // === ЛЕНТА ===
+        let feedPosts = JSON.parse(localStorage.getItem('rayon_feed')) || [
+            { id: 1, author: 'Совет дома', text: 'В эту субботу в 10:00 состоится субботник! Выходим чистить двор. За участие дадим по 100 баллов.', image: null, likes: 12, time: 'Сегодня, 09:41' },
+            { id: 2, author: 'Мария', text: 'Смотрите, какие красивые цветы расцвели у 3-го подъезда! 🌸', image: 'https://images.unsplash.com/photo-1490750967868-88cb44c3c70c?auto=format&fit=crop&w=500&q=60', likes: 24, time: 'Вчера, 18:20' }
+        ];
+
+        function renderFeed() {
+            let container = document.getElementById('feed-container');
+            container.innerHTML = '';
+            
+            feedPosts.forEach(post => {
+                let imageHtml = post.image ? `<img src="${post.image}" class="post-image">` : '';
+                container.innerHTML += `
+                    <div class="feed-post">
+                        <div class="post-header">
+                            <div class="avatar" style="width: 32px; height: 32px; font-size: 14px;">${post.author.charAt(0)}</div>
+                            <div>
+                                <div class="post-author">${post.author}</div>
+                                <div class="post-time">${post.time}</div>
+                            </div>
+                        </div>
+                        ${imageHtml}
+                        <div class="post-text">${post.text}</div>
+                        <div class="post-actions">
+                            <div class="post-action" onclick="likePost(${post.id})">
+                                <span class="material-symbols-rounded" style="font-size: 18px;">favorite</span> ${post.likes}
+                            </div>
+                            <div class="post-action">
+                                <span class="material-symbols-rounded" style="font-size: 18px;">chat_bubble</span> Комментировать
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function likePost(id) {
+            let post = feedPosts.find(p => p.id === id);
+            if (post) {
+                post.likes++;
+                localStorage.setItem('rayon_feed', JSON.stringify(feedPosts));
+                renderFeed();
+            }
+        }
+
+        // Создание поста
+        let postImageData = null;
+
+        function openCreatePostSheet() {
+            document.getElementById('create-post-sheet').classList.add('open');
+        }
+        function closeCreatePostSheet() {
+            document.getElementById('create-post-sheet').classList.remove('open');
+            document.getElementById('post-text-input').value = '';
+            document.getElementById('post-image-preview').style.display = 'none';
+            postImageData = null;
+        }
+
+        function previewPostImage(event) {
+            let file = event.target.files[0];
+            if (!file) return;
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                postImageData = e.target.result;
+                let img = document.getElementById('post-image-preview');
+                img.src = postImageData;
+                img.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function publishPost() {
+            let text = document.getElementById('post-text-input').value.trim();
+            if (!text && !postImageData) { tg.showAlert("Напишите текст или добавьте фото"); return; }
+
+            let now = new Date();
+            let timeStr = "Сегодня, " + now.getHours() + ':' + now.getMinutes().toString().padStart(2, '0');
+
+            let newPost = {
+                id: Date.now(),
+                author: userName,
+                text: text,
+                image: postImageData,
+                likes: 0,
+                time: timeStr
+            };
+
+            feedPosts.unshift(newPost);
+            localStorage.setItem('rayon_feed', JSON.stringify(feedPosts));
+            
+            closeCreatePostSheet();
+            renderFeed();
+            tg.showAlert("Пост опубликован! +10 баллов");
+            updateScore(10, "Новый пост в ленте");
+        }
+
+        // === ОСТАЛЬНАЯ ЛОГИКА (карта, баллы, чаты и т.д.) ===
         function changeProfileBg(event) {
             let file = event.target.files[0];
             if (!file) return;
-
             let reader = new FileReader();
             reader.onload = function(e) {
                 let imageUrl = e.target.result;
-                // Ставим картинку на фон
                 document.getElementById('profile-card').style.backgroundImage = `url(${imageUrl})`;
-                // Сохраняем в память телефона, чтобы не пропал при перезагрузке
                 localStorage.setItem('profile_bg', imageUrl);
                 tg.showAlert("Фон профиля обновлен!");
             };
             reader.readAsDataURL(file);
         }
-
-        // Загружаем сохраненный фон при старте (если он есть)
         let savedBg = localStorage.getItem('profile_bg');
-        if (savedBg) {
-            document.getElementById('profile-card').style.backgroundImage = `url(${savedBg})`;
-        }
+        if (savedBg) { document.getElementById('profile-card').style.backgroundImage = `url(${savedBg})`; }
 
-        // === СИСТЕМА БАЛЛОВ И ИСТОРИЯ ===
         let currentScore = parseInt(localStorage.getItem('rayon_score')) || 0;
         let problemsCount = parseInt(localStorage.getItem('rayon_problems')) || 0;
-        
         let scoreHistory = JSON.parse(localStorage.getItem('rayon_history')) || [
             { type: 'plus', amount: 150, title: 'Стартовый бонус', date: 'Сегодня, 09:00' }
         ];
 
         function updateScore(amount, title) {
             if (amount > 0 && amount === 10) problemsCount++; 
-            
             currentScore += amount;
             localStorage.setItem('rayon_score', currentScore);
             localStorage.setItem('rayon_problems', problemsCount);
             
             let now = new Date();
             let timeStr = "Сегодня, " + now.getHours() + ':' + now.getMinutes().toString().padStart(2, '0');
-            
-            scoreHistory.unshift({
-                type: amount > 0 ? 'plus' : 'minus',
-                amount: Math.abs(amount),
-                title: title,
-                date: timeStr
-            });
-            
+            scoreHistory.unshift({ type: amount > 0 ? 'plus' : 'minus', amount: Math.abs(amount), title: title, date: timeStr });
             localStorage.setItem('rayon_history', JSON.stringify(scoreHistory));
             updateUI();
         }
 
         function updateUI() {
             document.getElementById('user-balance').innerText = currentScore;
-            
             let currentLevelScore = currentScore % 1000;
             let levelPercent = currentLevelScore / 10;
-            
             document.getElementById('level-progress-text').innerText = `${currentLevelScore} / 1000`;
             document.getElementById('level-progress-bar').style.width = `${levelPercent}%`;
-            
             document.getElementById('profile-level-text').innerText = `${currentLevelScore} / 1000`;
             document.getElementById('profile-progress-bar').style.width = `${levelPercent}%`;
-            document.getElementById('stat-problems').innerText = problemsCount;
-            
             renderHistory();
         }
 
         function renderHistory() {
             let list = document.getElementById('history-list');
             list.innerHTML = '';
-            
             scoreHistory.forEach(item => {
                 let isPlus = item.type === 'plus';
-                let sign = isPlus ? '+' : '-';
-                let colorClass = isPlus ? 'amount-plus' : 'amount-minus';
-                let iconBg = isPlus ? '#e8f5e9' : '#ffebee';
-                let iconColor = isPlus ? '#34c759' : '#ff3b30';
-                let iconName = isPlus ? 'add_circle' : 'remove_circle';
-
                 list.innerHTML += `
                     <div class="history-item">
                         <div class="history-left">
-                            <div class="history-icon" style="background: ${iconBg}; color: ${iconColor};">
-                                <span class="material-symbols-rounded">${iconName}</span>
+                            <div class="history-icon" style="background: ${isPlus ? '#e8f5e9' : '#ffebee'}; color: ${isPlus ? '#34c759' : '#ff3b30'};">
+                                <span class="material-symbols-rounded">${isPlus ? 'add_circle' : 'remove_circle'}</span>
                             </div>
                             <div>
                                 <div class="history-title">${item.title}</div>
                                 <div class="history-date">${item.date}</div>
                             </div>
                         </div>
-                        <div class="history-amount ${colorClass}">${sign}${item.amount}</div>
+                        <div class="history-amount ${isPlus ? 'amount-plus' : 'amount-minus'}">${isPlus ? '+' : '-'}${item.amount}</div>
                     </div>
                 `;
             });
         }
 
-        function openHistory() {
-            hideAllScreens();
-            document.getElementById('history-screen').classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        }
-
-        function openGiftSheet() {
-            document.getElementById('gift-sheet').classList.add('open');
-        }
-        function closeGiftSheet() {
-            document.getElementById('gift-sheet').classList.remove('open');
-        }
-
+        function openHistory() { hideAllScreens(); document.getElementById('history-screen').classList.add('active'); }
+        function openGiftSheet() { document.getElementById('gift-sheet').classList.add('open'); }
+        function closeGiftSheet() { document.getElementById('gift-sheet').classList.remove('open'); }
         function sendGift() {
             let amount = parseInt(document.getElementById('gift-amount').value);
             let reason = document.getElementById('gift-reason').value.trim();
-            
-            if (!amount || amount <= 0) { tg.showAlert("Введите сумму больше 0"); return; }
-            if (amount > 100) { tg.showAlert("Максимум 100 баллов за раз"); return; }
-            if (amount > currentScore) { tg.showAlert("У вас недостаточно баллов"); return; }
-            if (!reason) reason = "Подарок соседу";
-
-            updateScore(-amount, `Подарок: ${reason}`);
+            if (!amount || amount <= 0 || amount > 100 || amount > currentScore) { tg.showAlert("Ошибка в сумме"); return; }
+            updateScore(-amount, `Подарок: ${reason || 'Соседу'}`);
             tg.showAlert("🎁 Подарок отправлен!");
             closeGiftSheet();
         }
 
         updateUI();
+        renderFeed();
 
         let myMap;
         let mapInitialized = false;
@@ -526,52 +566,41 @@
         function hideAllScreens() {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('create-post-btn').style.display = 'none';
+            closeChat();
         }
 
         function openMain() {
             hideAllScreens();
             document.getElementById('main-screen').classList.add('active');
             document.getElementById('nav-home').classList.add('active');
-            closeChat(); 
+        }
+
+        function openFeed() {
+            hideAllScreens();
+            document.getElementById('feed-screen').classList.add('active');
+            document.getElementById('nav-feed').classList.add('active');
+            document.getElementById('create-post-btn').style.display = 'flex';
+            renderFeed();
         }
 
         function openMap() {
             hideAllScreens();
             document.getElementById('map-screen').classList.add('active');
             document.getElementById('nav-map').classList.add('active');
-            closeChat();
-
-            if (!mapInitialized) {
-                ymaps.ready(function() {
-                    initMap();
-                    mapInitialized = true;
-                });
-            }
-        }
-
-        function openChats() {
-            hideAllScreens();
-            document.getElementById('chats-screen').classList.add('active');
-            document.getElementById('nav-chats').classList.add('active');
+            if (!mapInitialized) { ymaps.ready(function() { initMap(); mapInitialized = true; }); }
         }
 
         function openProfile() {
             hideAllScreens();
             document.getElementById('profile-screen').classList.add('active');
             document.getElementById('nav-profile').classList.add('active');
-            closeChat();
         }
 
         function initMap() {
-            myMap = new ymaps.Map("yandex-map", {
-                center: [55.751244, 37.618423],
-                zoom: 15,
-                controls: ['zoomControl']
-            });
-
+            myMap = new ymaps.Map("yandex-map", { center: [55.751244, 37.618423], zoom: 15, controls: ['zoomControl'] });
             addMarkerToMap([55.751, 37.618], 'repair', 'Сломанная лавочка', 'Спинка сломана, сидеть невозможно.');
             addMarkerToMap([55.753, 37.621], 'eco', 'Фандомат', 'Сюда можно сдать пластик.');
-
             myMap.events.add('click', function (e) {
                 tempCoords = e.get('coords');
                 document.getElementById('problem-desc').value = '';
@@ -584,13 +613,10 @@
             if (!navigator.geolocation) { tg.showAlert("Нет поддержки геолокации."); return; }
             navigator.geolocation.getCurrentPosition(
                 function(position) {
-                    let lat = position.coords.latitude;
-                    let lon = position.coords.longitude;
-                    myMap.setCenter([lat, lon], 17);
-                    let myPlacemark = new ymaps.Placemark([lat, lon], { hintContent: 'Вы здесь' }, { preset: 'islands#blueDotIconWithCaption' });
-                    myMap.geoObjects.add(myPlacemark);
+                    myMap.setCenter([position.coords.latitude, position.coords.longitude], 17);
+                    myMap.geoObjects.add(new ymaps.Placemark([position.coords.latitude, position.coords.longitude], { hintContent: 'Вы здесь' }, { preset: 'islands#blueDotIconWithCaption' }));
                 },
-                function(error) { tg.showAlert("Ошибка GPS: проверьте разрешения."); },
+                function(error) { tg.showAlert("Ошибка GPS."); },
                 { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
             );
         }
@@ -602,64 +628,27 @@
             document.getElementById('category-sheet').classList.add('open');
         }
 
-        function hideCategorySheet() {
-            document.getElementById('category-sheet').classList.remove('open');
-            tempCoords = null;
-        }
+        function hideCategorySheet() { document.getElementById('category-sheet').classList.remove('open'); tempCoords = null; }
 
         function selectCategory(type) {
             document.getElementById('category-sheet').classList.remove('open');
             if (!tempCoords) return;
-
             let userDesc = document.getElementById('problem-desc').value.trim();
-            let title, defaultDesc;
-            if (type === 'repair') { title = 'Ремонт'; defaultDesc = 'Нужен ремонт.'; }
-            if (type === 'eco') { title = 'Экология'; defaultDesc = 'Вопрос по экологии.'; }
-            if (type === 'help') { title = 'Помощь'; defaultDesc = 'Требуется помощь.'; }
-            if (type === 'security') { title = 'Безопасность'; defaultDesc = 'Вопрос безопасности.'; }
-
-            let finalDesc = userDesc ? userDesc : defaultDesc;
-
-            addMarkerToMap(tempCoords, type, title, finalDesc);
-            
+            let title = type === 'repair' ? 'Ремонт' : type === 'eco' ? 'Экология' : type === 'help' ? 'Помощь' : 'Безопасность';
+            addMarkerToMap(tempCoords, type, title, userDesc || 'Описание отсутствует');
             updateScore(10, `Новая метка: ${title}`);
-            
             tempCoords = null;
         }
 
         function addMarkerToMap(coords, type, title, desc) {
-            let color = 'rgba(255, 59, 48, 0.8)'; 
-            let icon = 'build';
-            if (type === 'eco') { color = 'rgba(52, 199, 89, 0.8)'; icon = 'eco'; }
-            if (type === 'help') { color = 'rgba(255, 149, 0, 0.8)'; icon = 'volunteer_activism'; }
-            if (type === 'security') { color = 'rgba(0, 122, 255, 0.8)'; icon = 'shield'; }
-
-            let htmlLayout = `
-                <div style="width: 46px; height: 46px; background-color: ${color}; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(0,0,0,0.2); border: 2px solid rgba(255, 255, 255, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
-                    <span class="material-symbols-rounded" style="color: white; font-size: 24px; transform: rotate(45deg); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">${icon}</span>
-                </div>
-            `;
-
-            var placemark = new ymaps.Placemark(coords, {
-                hintContent: title, 
-                balloonContentHeader: title, 
-                balloonContentBody: desc,    
-            }, { 
-                iconLayout: 'default#imageWithContent',
-                iconImageHref: 'https://yandex.ru/images/template/clear.png',
-                iconImageSize: [46, 46],
-                iconImageOffset: [-23, -46],
-                iconContentOffset: [0, 0],
-                iconContentLayout: ymaps.templateLayoutFactory.createClass(htmlLayout)
-            });
-            myMap.geoObjects.add(placemark);
+            let color = type === 'repair' ? 'rgba(255, 59, 48, 0.8)' : type === 'eco' ? 'rgba(52, 199, 89, 0.8)' : type === 'help' ? 'rgba(255, 149, 0, 0.8)' : 'rgba(0, 122, 255, 0.8)';
+            let icon = type === 'repair' ? 'build' : type === 'eco' ? 'eco' : type === 'help' ? 'volunteer_activism' : 'shield';
+            let htmlLayout = `<div style="width: 46px; height: 46px; background-color: ${color}; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(0,0,0,0.2); border: 2px solid rgba(255, 255, 255, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);"><span class="material-symbols-rounded" style="color: white; font-size: 24px; transform: rotate(45deg); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">${icon}</span></div>`;
+            myMap.geoObjects.add(new ymaps.Placemark(coords, { hintContent: title, balloonContentHeader: title, balloonContentBody: desc }, { iconLayout: 'default#imageWithContent', iconImageHref: 'https://yandex.ru/images/template/clear.png', iconImageSize: [46, 46], iconImageOffset: [-23, -46], iconContentOffset: [0, 0], iconContentLayout: ymaps.templateLayoutFactory.createClass(htmlLayout) }));
         }
 
         let currentChatId = null;
-        let chatHistory = {
-            'user_2': [ { sender: 'user_2', text: 'Привет! Выйдешь на субботник?', time: '10:45' } ],
-            'user_3': [ { sender: 'user_3', text: 'Одолжи дрель, пожалуйста', time: 'Вчера' } ]
-        };
+        let chatHistory = { 'user_2': [{ sender: 'user_2', text: 'Привет! Выйдешь на субботник?', time: '10:45' }], 'user_3': [{ sender: 'user_3', text: 'Одолжи дрель, пожалуйста', time: 'Вчера' }] };
 
         function openChat(userId, name) {
             currentChatId = userId;
@@ -668,46 +657,33 @@
             document.getElementById('chat-header-name').innerText = name;
             renderMessages(userId);
         }
-
-        function closeChat() {
-            currentChatId = null;
-            document.getElementById('chat-window').style.display = 'none';
-            document.getElementById('chat-list-container').style.display = 'block';
-        }
-
+        function closeChat() { currentChatId = null; document.getElementById('chat-window').style.display = 'none'; document.getElementById('chat-list-container').style.display = 'block'; }
         function renderMessages(userId) {
             const container = document.getElementById('chat-messages-container');
             container.innerHTML = '';
-            let messages = chatHistory[userId] || [];
-            messages.forEach(msg => {
-                let isMe = msg.sender === 'me';
+            (chatHistory[userId] || []).forEach(msg => {
                 let msgDiv = document.createElement('div');
-                msgDiv.className = `message ${isMe ? 'outgoing' : 'incoming'}`;
+                msgDiv.className = `message ${msg.sender === 'me' ? 'outgoing' : 'incoming'}`;
                 msgDiv.innerHTML = `${msg.text}<div class="message-time">${msg.time}</div>`;
                 container.appendChild(msgDiv);
             });
             container.scrollTop = container.scrollHeight;
         }
-
         function sendMessage() {
             let input = document.getElementById('message-input');
             let text = input.value.trim();
             if (!text || !currentChatId) return;
-
             let now = new Date();
             let timeStr = now.getHours() + ':' + now.getMinutes().toString().padStart(2, '0');
             if (!chatHistory[currentChatId]) chatHistory[currentChatId] = [];
             chatHistory[currentChatId].push({ sender: 'me', text: text, time: timeStr });
-
             input.value = '';
             renderMessages(currentChatId);
-            
             setTimeout(() => {
                 chatHistory[currentChatId].push({ sender: currentChatId, text: "Понял тебя! Это тестовый ответ.", time: timeStr });
                 renderMessages(currentChatId);
             }, 1500);
         }
-
         function handleKeyPress(e) { if (e.key === 'Enter') sendMessage(); }
     </script>
 </body>
