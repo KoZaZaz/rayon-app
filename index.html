@@ -124,7 +124,6 @@
         .chat-input { flex-grow: 1; padding: 12px; border-radius: 20px; border: 1px solid #ddd; background: #f2f4f7; outline: none; font-size: 14px; }
         .chat-send-btn { width: 44px; height: 44px; border-radius: 50%; background: var(--accent); border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 
-        /* СТИЛИ ДЛЯ ИСТОРИИ БАЛЛОВ */
         .history-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: white; border-radius: 16px; margin-bottom: 10px; border: 1px solid #eee; }
         .history-left { display: flex; align-items: center; gap: 12px; }
         .history-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
@@ -133,6 +132,32 @@
         .history-amount { font-weight: 800; font-size: 18px; }
         .amount-plus { color: #34c759; }
         .amount-minus { color: #ff3b30; }
+
+        /* КАСТОМИЗАЦИЯ ПРОФИЛЯ */
+        .profile-header-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 24px;
+            border-radius: 24px;
+            position: relative;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+        }
+        .profile-header-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4); /* Затемнение для читаемости текста */
+            z-index: 0;
+        }
+        .profile-header-card > * {
+            position: relative;
+            z-index: 1;
+        }
+        /* Скрытый инпут для выбора файла */
+        #file-input { display: none; }
     </style>
 </head>
 <body>
@@ -156,7 +181,6 @@
             </div>
         </div>
 
-        <!-- Карточка баллов (теперь кликабельная) -->
         <div class="balance-card" onclick="openHistory()">
             <div class="balance-title">
                 <span class="material-symbols-rounded" style="font-size: 18px;">auto_awesome</span>
@@ -205,9 +229,7 @@
     <!-- ЭКРАН ИСТОРИИ БАЛЛОВ -->
     <div id="history-screen" class="screen">
         <div class="section-title">История баллов</div>
-        <div id="history-list">
-            <!-- Сюда будут добавляться записи -->
-        </div>
+        <div id="history-list"></div>
     </div>
 
     <!-- ЭКРАН КАРТЫ -->
@@ -261,11 +283,13 @@
     <!-- ЭКРАН ПРОФИЛЯ -->
     <div id="profile-screen" class="screen">
         <div class="section-title">Мой профиль</div>
-        <div class="action-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 24px;">
+        
+        <!-- Карточка профиля с возможностью смены фона -->
+        <div class="profile-header-card" id="profile-card">
             <div style="display: flex; align-items: center; gap: 16px;">
                 <div class="avatar" id="profile-avatar" style="width: 64px; height: 64px; font-size: 28px; border-radius: 20px; background: rgba(255,255,255,0.2); box-shadow: none;"></div>
                 <div>
-                    <div style="font-size: 22px; font-weight: 800;" id="profile-name">Загрузка...</div>
+                    <div style="font-size: 22px; font-weight: 800; text-shadow: 0 2px 4px rgba(0,0,0,0.5);" id="profile-name">Загрузка...</div>
                     <div style="font-size: 14px; opacity: 0.9; margin-top: 4px;">Уровень: Активист</div>
                 </div>
             </div>
@@ -279,9 +303,19 @@
                 </div>
             </div>
         </div>
+
+        <!-- Кнопка смены фона -->
+        <input type="file" id="file-input" accept="image/*" onchange="changeProfileBg(event)">
+        <div class="action-card" style="margin-top: 16px; flex-direction: row; align-items: center; justify-content: space-between;" onclick="document.getElementById('file-input').click()">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="action-icon" style="background: #e5f0ff; color: #007aff;"><span class="material-symbols-rounded">photo_library</span></div>
+                <div class="action-text">Изменить фон профиля</div>
+            </div>
+            <span class="material-symbols-rounded" style="color: var(--text-muted);">chevron_right</span>
+        </div>
         
         <!-- Кнопка подарить баллы -->
-        <div class="action-card" style="margin-top: 16px; flex-direction: row; align-items: center; justify-content: space-between;" onclick="openGiftSheet()">
+        <div class="action-card" style="margin-top: 8px; flex-direction: row; align-items: center; justify-content: space-between;" onclick="openGiftSheet()">
             <div style="display: flex; align-items: center; gap: 12px;">
                 <div class="action-icon" style="background: #fff3cd; color: #ff9500;"><span class="material-symbols-rounded">card_giftcard</span></div>
                 <div class="action-text">Подарить баллы соседу</div>
@@ -359,11 +393,33 @@
         document.getElementById('profile-name').innerText = userName;
         document.getElementById('profile-avatar').innerText = userName.charAt(0).toUpperCase();
 
+        // === СМЕНА ФОНА ПРОФИЛЯ ===
+        function changeProfileBg(event) {
+            let file = event.target.files[0];
+            if (!file) return;
+
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                let imageUrl = e.target.result;
+                // Ставим картинку на фон
+                document.getElementById('profile-card').style.backgroundImage = `url(${imageUrl})`;
+                // Сохраняем в память телефона, чтобы не пропал при перезагрузке
+                localStorage.setItem('profile_bg', imageUrl);
+                tg.showAlert("Фон профиля обновлен!");
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Загружаем сохраненный фон при старте (если он есть)
+        let savedBg = localStorage.getItem('profile_bg');
+        if (savedBg) {
+            document.getElementById('profile-card').style.backgroundImage = `url(${savedBg})`;
+        }
+
         // === СИСТЕМА БАЛЛОВ И ИСТОРИЯ ===
         let currentScore = parseInt(localStorage.getItem('rayon_score')) || 0;
         let problemsCount = parseInt(localStorage.getItem('rayon_problems')) || 0;
         
-        // История (сохраняем в память)
         let scoreHistory = JSON.parse(localStorage.getItem('rayon_history')) || [
             { type: 'plus', amount: 150, title: 'Стартовый бонус', date: 'Сегодня, 09:00' }
         ];
@@ -375,7 +431,6 @@
             localStorage.setItem('rayon_score', currentScore);
             localStorage.setItem('rayon_problems', problemsCount);
             
-            // Добавляем в историю
             let now = new Date();
             let timeStr = "Сегодня, " + now.getHours() + ':' + now.getMinutes().toString().padStart(2, '0');
             
@@ -435,15 +490,12 @@
             });
         }
 
-        // Открытие экрана истории
         function openHistory() {
             hideAllScreens();
             document.getElementById('history-screen').classList.add('active');
-            // Убираем активную кнопку меню, так как истории нет в меню
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         }
 
-        // Меню подарка
         function openGiftSheet() {
             document.getElementById('gift-sheet').classList.add('open');
         }
@@ -570,7 +622,6 @@
 
             addMarkerToMap(tempCoords, type, title, finalDesc);
             
-            // Начисляем 10 баллов и пишем в историю
             updateScore(10, `Новая метка: ${title}`);
             
             tempCoords = null;
