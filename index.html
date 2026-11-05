@@ -295,18 +295,19 @@
             tempCoords = null;
         }
 
-        // ФУНКЦИЯ С ВШИТЫМИ ИКОНКАМИ (Base64)
+        // ВШИТЫЕ СТИЛЬНЫЕ 3D-ИКОНКИ (с градиентом)
         function addMarkerToMap(coords, type, title, desc) {
-            // Иконки закодированы прямо в текст программы
-            let redIcon = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><path d='M32 0C17.4 0 5 11.6 5 26c0 18 22 35 24.6 37.3a4 4 0 0 0 4.8 0C37 61 59 44 59 26 5 11.6 17.4 0 32 0z' fill='%23ff3b30'/><path d='M36.5 22.5l-3.8-3.8-9 9 3.8 3.8 9-9zM24 27l-3 3 6 6 3-3-6-6z' fill='white'/></svg>";
-            let greenIcon = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><path d='M32 0C17.4 0 5 11.6 5 26c0 18 22 35 24.6 37.3a4 4 0 0 0 4.8 0C37 61 59 44 59 26 5 11.6 17.4 0 32 0z' fill='%2334c759'/><path d='M38 26c0-3-2-5-5-5s-5 2-5 5 2 5 5 5 5-2 5-5zm-2 0c0 2-1 3-3 3s-3-1-3-3 1-3 3-3 3 1 3 3zm-3-9c-4 0-7 3-7 7 0 1 .5 3 1 4l-1 1c-1-2-2-4-2-5 0-5 4-9 9-9 1 0 2 .5 3 1l1-1c-1-1-2-2-4-2z' fill='white'/></svg>";
-            let orangeIcon = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><path d='M32 0C17.4 0 5 11.6 5 26c0 18 22 35 24.6 37.3a4 4 0 0 0 4.8 0C37 61 59 44 59 26 5 11.6 17.4 0 32 0z' fill='%23ff9500'/><path d='M26 26c0-3 2-5 5-5s5 2 5 5-2 5-5 5-5-2-5-5zm-2 0c0 4 3 7 7 7s7-3 7-7-3-7-7-7-7 3-7 7zm5-2v4h4v-4h-4z' fill='white'/></svg>";
-            let blueIcon = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><path d='M32 0C17.4 0 5 11.6 5 26c0 18 22 35 24.6 37.3a4 4 0 0 0 4.8 0C37 61 59 44 59 26 5 11.6 17.4 0 32 0z' fill='%23007aff'/><path d='M32 18l-6 3v4c0 4 2 7 6 8 4-1 6-4 6-8v-4l-6-3zm0 2l4 2v3c0 3-1 5-4 6-3-1-4-3-4-6v-3l4-2z' fill='white'/></svg>";
-
-            let iconUrl = redIcon; // По умолчанию ремонт
-            if (type === 'eco') iconUrl = greenIcon;
-            if (type === 'help') iconUrl = orangeIcon;
-            if (type === 'security') iconUrl = blueIcon;
+            let iconUrl = '';
+            
+            if (type === 'repair') {
+                iconUrl = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><linearGradient id='g1' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='%23ff5e5e'/><stop offset='100%' stop-color='%23d40000'/></linearGradient></defs><path d='M32 2C18 2 6 13 6 27c0 18 23 34 24 35 1 1 3 1 4 0 1-1 24-17 24-35C58 13 46 2 32 2z' fill='url(%23g1)'/><circle cx='32' cy='27' r='13' fill='white' opacity='0.9'/><path d='M38 22l-4-4-10 10 4 4 10-10zM24 27l-3 3 7 7 3-3-7-7z' fill='%23d40000'/></svg>";
+            } else if (type === 'eco') {
+                iconUrl = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><linearGradient id='g2' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='%2350e373'/><stop offset='100%' stop-color='%231a9d3c'/></linearGradient></defs><path d='M32 2C18 2 6 13 6 27c0 18 23 34 24 35 1 1 3 1 4 0 1-1 24-17 24-35C58 13 46 2 32 2z' fill='url(%23g2)'/><circle cx='32' cy='27' r='13' fill='white' opacity='0.9'/><path d='M38 27c0-3-2-5-5-5s-5 2-5 5 2 5 5 5 5-2 5-5zm-2 0c0 2-1 3-3 3s-3-1-3-3 1-3 3-3 3 1 3 3zm-3-9c-4 0-7 3-7 7 0 1 .5 3 1 4l-1 1c-1-2-2-4-2-5 0-5 4-9 9-9 1 0 2 .5 3 1l1-1c-1-1-2-2-4-2z' fill='%231a9d3c'/></svg>";
+            } else if (type === 'help') {
+                iconUrl = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><linearGradient id='g3' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='%23ffb74d'/><stop offset='100%' stop-color='%23f57c00'/></linearGradient></defs><path d='M32 2C18 2 6 13 6 27c0 18 23 34 24 35 1 1 3 1 4 0 1-1 24-17 24-35C58 13 46 2 32 2z' fill='url(%23g3)'/><circle cx='32' cy='27' r='13' fill='white' opacity='0.9'/><path d='M26 27c0-3 2-5 5-5s5 2 5 5-2 5-5 5-5-2-5-5zm-2 0c0 4 3 7 7 7s7-3 7-7-3-7-7-7-7 3-7 7zm5-2v4h4v-4h-4z' fill='%23f57c00'/></svg>";
+            } else if (type === 'security') {
+                iconUrl = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><linearGradient id='g4' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='%2342a5f5'/><stop offset='100%' stop-color='%230d47a1'/></linearGradient></defs><path d='M32 2C18 2 6 13 6 27c0 18 23 34 24 35 1 1 3 1 4 0 1-1 24-17 24-35C58 13 46 2 32 2z' fill='url(%23g4)'/><circle cx='32' cy='27' r='13' fill='white' opacity='0.9'/><path d='M32 19l-6 3v4c0 4 2 7 6 8 4-1 6-4 6-8v-4l-6-3zm0 2l4 2v3c0 3-1 5-4 6-3-1-4-3-4-6v-3l4-2z' fill='%230d47a1'/></svg>";
+            }
 
             var placemark = new ymaps.Placemark(coords, {
                 hintContent: title,
