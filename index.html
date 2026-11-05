@@ -86,6 +86,28 @@
         
         /* Карта */.map-container { display: none; height: 75vh; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.1); position: relative; }
         .back-btn { position: absolute; top: 16px; left: 16px; background: white; padding: 8px 16px; border-radius: 20px; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.2); cursor: pointer; z-index: 10; }
+        
+        /* Кнопка добавления */
+        .add-btn { position: absolute; bottom: 16px; right: 16px; background: var(--accent); color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(88, 86, 214, 0.4); cursor: pointer; z-index: 10; transition: 0.2s; }
+        .add-btn:active { transform: scale(0.9); }
+
+        /* Меню выбора категории (Bottom Sheet) */
+        .category-sheet { position: fixed; bottom: -100%; left: 0; right: 0; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-radius: 24px 24px 0 0; padding: 24px; box-shadow: 0 -10px 30px rgba(0,0,0,0.1); transition: bottom 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 200; }
+        .category-sheet.open { bottom: 0; }
+        .category-sheet h3 { margin: 0 0 16px 0; font-size: 18px; text-align: center; }
+        .category-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .category-item { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; border-radius: 16px; background: #f2f4f7; cursor: pointer; transition: 0.2s; }
+        .category-item:active { transform: scale(0.95); }
+        .category-item .material-symbols-rounded { font-size: 32px; margin-bottom: 8px; }
+        .category-item span:last-child { font-weight: 600; font-size: 13px; }
+        
+        /* Цвета для категорий */
+        .cat-repair { color: #ff3b30; background: #ffebee; }
+        .cat-eco { color: #34c759; background: #e8f5e9; }
+        .cat-help { color: #ff9500; background: #fff3cd; }
+        .cat-security { color: #007aff; background: #e5f0ff; }
+
+        .close-sheet { text-align: center; color: #8e8e93; font-weight: 600; margin-top: 16px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -129,8 +151,7 @@
             <div class="action-card" onclick="openMap()">
                 <div class="action-icon icon-map"><span class="material-symbols-rounded">map</span></div>
                 <div class="action-text">Карта района</div>
-            </div>
-            <div class="action-card" onclick="tg.showAlert('Форма отправки!')">
+            </div><div class="action-card" onclick="tg.showAlert('Форма отправки!')">
                 <div class="action-icon icon-cam"><span class="material-symbols-rounded">photo_camera</span></div>
                 <div class="action-text">Сообщить о проблеме</div>
             </div>
@@ -159,13 +180,43 @@
     <div id="map-screen" class="map-container">
         <div id="yandex-map" style="width: 100%; height: 100%;"></div>
         <div onclick="openMain()" class="back-btn">← Назад</div>
+        
+        <!-- Кнопка добавления -->
+        <div onclick="showCategorySheet()" class="add-btn">
+            <span class="material-symbols-rounded">add_location_alt</span>
+        </div>
+    </div>
+
+    <!-- МЕНЮ ВЫБОРА КАТЕГОРИИ -->
+    <div id="category-sheet" class="category-sheet">
+        <h3>Что вы хотите отметить?</h3>
+        <div class="category-grid">
+            <div class="category-item" onclick="selectCategory('repair')">
+                <span class="material-symbols-rounded cat-repair">build</span>
+                <span>Ремонт</span>
+            </div>
+            <div class="category-item" onclick="selectCategory('eco')">
+                <span class="material-symbols-rounded cat-eco">eco</span>
+                <span>Экология</span>
+            </div>
+            <div class="category-item" onclick="selectCategory('help')">
+                <span class="material-symbols-rounded cat-help">volunteer_activism</span>
+                <span>Помощь</span>
+            </div>
+            <div class="category-item" onclick="selectCategory('security')">
+                <span class="material-symbols-rounded cat-security">shield</span>
+                <span>Безопасность</span>
+            </div>
+        </div>
+        <div class="close-sheet" onclick="hideCategorySheet()">Отмена</div>
     </div>
 
     <!-- НИЖНЕЕ МЕНЮ -->
     <div class="bottom-nav-wrapper">
         <div class="bottom-nav">
             <div class="nav-item active" id="nav-home" onclick="openMain()">
-                <span class="material-symbols-rounded">home</span> Главная</div>
+                <span class="material-symbols-rounded">home</span> Главная
+            </div>
             <div class="nav-item" id="nav-map" onclick="openMap()">
                 <span class="material-symbols-rounded">location_on</span> Карта
             </div>
@@ -184,10 +235,9 @@
         tg.expand();
         tg.setHeaderColor('#f2f4f7');
 
-        // Получение имени пользователя
+        // 1. Получение имени
         let userName = tg.initDataUnsafe?.user?.first_name;
-        if (userName) {
-            document.getElementById('user-name').innerText = userName;
+        if (userName) {document.getElementById('user-name').innerText = userName;
             document.getElementById('user-avatar').innerText = userName.charAt(0).toUpperCase();
         } else {
             document.getElementById('user-name').innerText = "Гость";
@@ -196,7 +246,9 @@
         document.getElementById('user-balance').innerText = "150";
 
         // --- ЛОГИКА КАРТЫ ---
+        let myMap;
         let mapInitialized = false;
+        let pendingCoords = null; // Координаты, куда ставить метку
 
         function openMap() {
             document.getElementById('main-screen').style.display = 'none';
@@ -219,26 +271,86 @@
             document.getElementById('nav-home').classList.add('active');
         }
 
+        // Инициализация карты
         function initMap() {
-            var myMap = new ymaps.Map("yandex-map", {
-                center: [55.751244, 37.618423], // Центр Москвы
-                zoom: 14,
+            myMap = new ymaps.Map("yandex-map", {
+                center: [55.751244, 37.618423],
+                zoom: 15,
                 controls: ['zoomControl', 'geolocationControl']
             });
 
-            // Метка проблемы
-            var placemark = new ymaps.Placemark([55.751, 37.618], {
-                hintContent: 'Сломанная лавочка',
-                balloonContent: 'Здесь сломана лавочка. Статус: в работе.'
-            }, { preset: 'islands#redIcon' });
-            myMap.geoObjects.add(placemark);
+            // Геолокация
+            myMap.geolocation.get({
+                provider: 'browser',
+                mapStateAutoApply: true
+            }).then(function (result) {
+                myMap.setCenter(result.geoObjects.get(0).geometry.getCoordinates(), 16);
+            }).catch(function (error) {
+                console.log("Геолокация недоступна");
+            });
+
+            // Добавляем тестовые метки
+            addMarkerToMap([55.751, 37.618], 'repair', 'Сломанная лавочка', 'В работе');
+            addMarkerToMap([55.753, 37.621], 'eco', 'Фандомат', 'Сюда можно сдать пластик');
+
+            // Клик по карте (запоминаем координаты и открываем меню)
+            myMap.events.add('click', function (e) {
+                pendingCoords = e.get('coords');
+                showCategorySheet();
+            });
+        }
+
+        // Показ меню выбора категории
+        function showCategorySheet() {
+            // Если нажали на кнопку "+", а не на карту, берем центр экрана
+            if (!pendingCoords) {
+                pendingCoords = myMap.getCenter();
+            }
+            document.getElementById('category-sheet').classList.add('open');
+        }
+
+        // Скрытие меню
+        function hideCategorySheet() {
+            document.getElementById('category-sheet').classList.remove('open');
+            pendingCoords = null;
+        }
+
+        // Выбор категории и добавление метки
+        function selectCategory(type) {
+            hideCategorySheet();
+            if (!pendingCoords) return;
+
+            let title, desc;
+            if (type === 'repair') { title = 'Проблема (Ремонт)'; desc = 'Нужен ремонт.'; }
+            if (type === 'eco') { title = 'Экология'; desc = 'Вопрос по экологии.'; }
+            if (type === 'help') { title = 'Нужна помощь'; desc = 'Требуется помощь соседей.'; }
+            if (type === 'security') { title = 'Безопасность'; desc = 'Вопрос безопасности.'; }
+
+            addMarkerToMap(pendingCoords, type, title, desc);
             
-            // Метка эко-точки
-            var ecoPlacemark = new ymaps.Placemark([55.753, 37.621], {
-                hintContent: 'Фандомат',
-                balloonContent: 'Сюда можно сдать пластик и получить баллы.'
-            }, { preset: 'islands#greenIcon' });
-            myMap.geoObjects.add(ecoPlacemark);
+            // Вибрация
+            tg.HapticFeedback.impactOccurred('medium');
+            tg.showAlert('📍 Метка добавлена!');
+            pendingCoords = null;
+        }
+
+        // Универсальная функция добавления метки с иконкой
+        function addMarkerToMap(coords, type, title, desc) {
+            let iconHref = '';if (type === 'repair') iconHref = 'https://img.icons8.com/color/48/000000/maintenance.png';
+            if (type === 'eco') iconHref = 'https://img.icons8.com/color/48/000000/recycle-sign.png';
+            if (type === 'help') iconHref = 'https://img.icons8.com/color/48/000000/helping-hand.png';
+            if (type === 'security') iconHref = 'https://img.icons8.com/color/48/000000/shield.png';
+
+            var placemark = new ymaps.Placemark(coords, {
+                hintContent: title,
+                balloonContent: desc
+            }, { 
+                iconLayout: 'default#image',
+                iconImageHref: iconHref,
+                iconImageSize: [40, 40],
+                iconImageOffset: [-20, -40]
+            });
+            myMap.geoObjects.add(placemark);
         }
     </script>
 </body>
