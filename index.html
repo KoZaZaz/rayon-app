@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RAYON - Мой район</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Подключаем Яндекс.Карты -->
+    <!-- Подключаем Яндекс.Карты (без API-ключа, в тестовом режиме) -->
     <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
     
     <style>
@@ -46,7 +46,8 @@
         
         /* Баллы */
         .balance-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 24px; padding: 24px; color: white; margin-bottom: 24px; box-shadow: 0 12px 24px rgba(118, 75, 162, 0.3); position: relative; overflow: hidden; }
-        .balance-card::before { content: ''; position: absolute; top: -50px; right: -30px; width: 150px; height: 150px; background: rgba(255,255,255,0.15); border-radius: 50%; }.balance-card::after { content: ''; position: absolute; bottom: -40px; left: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; }
+        .balance-card::before { content: ''; position: absolute; top: -50px; right: -30px; width: 150px; height: 150px; background: rgba(255,255,255,0.15); border-radius: 50%; }
+        .balance-card::after { content: ''; position: absolute; bottom: -40px; left: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; }
         .balance-title { font-size: 14px; opacity: 0.9; font-weight: 500; display: flex; align-items: center; gap: 8px; }
         .balance-amount { font-size: 40px; font-weight: 800; margin: 8px 0 16px 0; letter-spacing: -1px; display: flex; align-items: center; gap: 8px;}
         .level-info { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
@@ -84,7 +85,8 @@
         .nav-item.active { color: var(--accent); }
         .nav-item.active span.material-symbols-rounded { transform: translateY(-2px) scale(1.1); opacity: 1; color: var(--accent); }
         
-        /* Карта */.map-container { display: none; height: 75vh; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.1); position: relative; }
+        /* Карта */
+        .map-container { display: none; height: 75vh; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.1); position: relative; }
         .back-btn { position: absolute; top: 16px; left: 16px; background: white; padding: 8px 16px; border-radius: 20px; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.2); cursor: pointer; z-index: 10; }
         
         /* Кнопка добавления */
@@ -151,7 +153,8 @@
             <div class="action-card" onclick="openMap()">
                 <div class="action-icon icon-map"><span class="material-symbols-rounded">map</span></div>
                 <div class="action-text">Карта района</div>
-            </div><div class="action-card" onclick="tg.showAlert('Форма отправки!')">
+            </div>
+            <div class="action-card" onclick="tg.showAlert('Форма отправки!')">
                 <div class="action-icon icon-cam"><span class="material-symbols-rounded">photo_camera</span></div>
                 <div class="action-text">Сообщить о проблеме</div>
             </div>
@@ -237,7 +240,8 @@
 
         // 1. Получение имени
         let userName = tg.initDataUnsafe?.user?.first_name;
-        if (userName) {document.getElementById('user-name').innerText = userName;
+        if (userName) {
+            document.getElementById('user-name').innerText = userName;
             document.getElementById('user-avatar').innerText = userName.charAt(0).toUpperCase();
         } else {
             document.getElementById('user-name').innerText = "Гость";
@@ -271,22 +275,12 @@
             document.getElementById('nav-home').classList.add('active');
         }
 
-        // Инициализация карты
+        // Инициализация карты (БЕЗ ОШИБКИ ГЕОЛОКАЦИИ)
         function initMap() {
             myMap = new ymaps.Map("yandex-map", {
-                center: [55.751244, 37.618423],
+                center: [55.751244, 37.618423], // Центр Москвы
                 zoom: 15,
-                controls: ['zoomControl', 'geolocationControl']
-            });
-
-            // Геолокация
-            myMap.geolocation.get({
-                provider: 'browser',
-                mapStateAutoApply: true
-            }).then(function (result) {
-                myMap.setCenter(result.geoObjects.get(0).geometry.getCoordinates(), 16);
-            }).catch(function (error) {
-                console.log("Геолокация недоступна");
+                controls: ['zoomControl']
             });
 
             // Добавляем тестовые метки
@@ -336,7 +330,8 @@
 
         // Универсальная функция добавления метки с иконкой
         function addMarkerToMap(coords, type, title, desc) {
-            let iconHref = '';if (type === 'repair') iconHref = 'https://img.icons8.com/color/48/000000/maintenance.png';
+            let iconHref = '';
+            if (type === 'repair') iconHref = 'https://img.icons8.com/color/48/000000/maintenance.png';
             if (type === 'eco') iconHref = 'https://img.icons8.com/color/48/000000/recycle-sign.png';
             if (type === 'help') iconHref = 'https://img.icons8.com/color/48/000000/helping-hand.png';
             if (type === 'security') iconHref = 'https://img.icons8.com/color/48/000000/shield.png';
