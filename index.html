@@ -132,10 +132,12 @@
         .profile-header-card > * { position: relative; z-index: 1; }
         #file-input { display: none; }
 
-        .feed-post { background: white; border-radius: 20px; padding: 16px; margin-bottom: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.03); }
+        /* СТИЛИ ДЛЯ ПОСТОВ */
+        .feed-post { background: white; border-radius: 20px; padding: 16px; margin-bottom: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.03); position: relative; }
         .post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
         .post-author { font-weight: 700; font-size: 14px; }
         .post-time { font-size: 11px; color: var(--text-muted); }
+        .post-menu-btn { margin-left: auto; cursor: pointer; color: var(--text-muted); }
         .post-image { width: 100%; border-radius: 12px; margin-bottom: 12px; max-height: 300px; object-fit: cover; }
         .post-text { font-size: 14px; line-height: 1.45; margin-bottom: 12px; }
         .post-actions { display: flex; gap: 16px; border-top: 1px solid #f0f0f0; padding-top: 12px; }
@@ -145,6 +147,9 @@
         .create-post-btn:active { transform: scale(0.9); }
         #post-file-input { display: none; }
         .post-preview { width: 100%; border-radius: 12px; margin-bottom: 12px; display: none; }
+
+        /* СТИЛИ ДЛЯ ДРУЗЕЙ */
+        .friend-item { display: flex; align-items: center; padding: 12px; background: white; border-radius: 16px; margin-bottom: 10px; border: 1px solid #eee; }
     </style>
 </head>
 <body>
@@ -204,7 +209,7 @@
         </div>
     </div> 
 
-    <!-- ЭКРАН ПУЛЬСА (Бывшая Лента) -->
+    <!-- ЭКРАН ПУЛЬСА -->
     <div id="feed-screen" class="screen">
         <div class="section-title">Пульс района</div>
         <div id="feed-container"></div>
@@ -214,6 +219,31 @@
     <div id="history-screen" class="screen">
         <div class="section-title">История баллов</div>
         <div id="history-list"></div>
+    </div>
+
+    <!-- ЭКРАН СПИСКА ДРУЗЕЙ -->
+    <div id="friends-screen" class="screen">
+        <div class="section-title">Мои друзья</div>
+        <div id="friends-list">
+            <div class="friend-item">
+                <div class="avatar" style="background: linear-gradient(135deg, #ff758c, #ff7eb3);">М</div>
+                <div class="chat-info" style="margin-left: 12px;">
+                    <div class="chat-name">Мария (кв. 42)</div>
+                    <div class="chat-last-msg">В друзьях</div>
+                </div>
+            </div>
+            <div class="friend-item">
+                <div class="avatar" style="background: linear-gradient(135deg, #667eea, #764ba2);">И</div>
+                <div class="chat-info" style="margin-left: 12px;">
+                    <div class="chat-name">Иван (кв. 15)</div>
+                    <div class="chat-last-msg">В друзьях</div>
+                </div>
+            </div>
+        </div>
+        <div class="action-card" style="margin-top: 16px; justify-content: center; align-items: center;" onclick="tg.showAlert('Поиск друзей появится после подключения сервера!')">
+            <span class="material-symbols-rounded" style="color: var(--accent);">person_add</span>
+            <div class="action-text">Найти друзей</div>
+        </div>
     </div>
 
     <!-- ЭКРАН КАРТЫ -->
@@ -294,6 +324,15 @@
             </div>
             <span class="material-symbols-rounded" style="color: var(--text-muted);">chevron_right</span>
         </div>
+
+        <!-- Новая кнопка друзей -->
+        <div class="action-card" style="margin-top: 8px; flex-direction: row; align-items: center; justify-content: space-between;" onclick="openFriends()">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="action-icon" style="background: #e8f5e9; color: #34c759;"><span class="material-symbols-rounded">group</span></div>
+                <div class="action-text">Мои друзья</div>
+            </div>
+            <span class="material-symbols-rounded" style="color: var(--text-muted);">chevron_right</span>
+        </div>
         
         <div class="action-card" style="margin-top: 8px; flex-direction: row; align-items: center; justify-content: space-between;" onclick="openGiftSheet()">
             <div style="display: flex; align-items: center; gap: 12px;">
@@ -327,9 +366,9 @@
         <div class="close-sheet" onclick="closeGiftSheet()">Отмена</div>
     </div>
 
-    <!-- МЕНЮ СОЗДАНИЯ ПОСТА -->
+    <!-- МЕНЮ СОЗДАНИЯ/РЕДАКТИРОВАНИЯ ПОСТА -->
     <div id="create-post-sheet" class="category-sheet">
-        <h3>Новый пост</h3>
+        <h3 id="post-sheet-title">Новый пост</h3>
         <input type="text" id="post-text-input" class="desc-input" placeholder="Что нового во дворе?">
         <input type="file" id="post-file-input" accept="image/*, video/*" onchange="previewPostImage(event)">
         <img id="post-image-preview" class="post-preview">
@@ -338,8 +377,18 @@
                 <span class="material-symbols-rounded">add_photo_alternate</span> Фото/Видео
             </button>
         </div>
-        <button onclick="publishPost()" style="width: 100%; padding: 16px; border-radius: 16px; border: none; background: var(--accent); color: white; font-weight: 700; font-size: 16px; cursor: pointer;">Опубликовать</button>
+        <button onclick="savePost()" id="save-post-btn" style="width: 100%; padding: 16px; border-radius: 16px; border: none; background: var(--accent); color: white; font-weight: 700; font-size: 16px; cursor: pointer;">Опубликовать</button>
         <div class="close-sheet" onclick="closeCreatePostSheet()">Отмена</div>
+    </div>
+
+    <!-- МЕНЮ УПРАВЛЕНИЯ ПОСТОМ -->
+    <div id="post-actions-sheet" class="category-sheet">
+        <h3>Действия с постом</h3>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+            <button onclick="editPost()" style="width: 100%; padding: 16px; border-radius: 16px; border: none; background: #f2f4f7; color: black; font-weight: 600; font-size: 16px; cursor: pointer; text-align: left; padding-left: 20px;">✏️ Редактировать</button>
+            <button onclick="deletePost()" style="width: 100%; padding: 16px; border-radius: 16px; border: none; background: #ffebee; color: #ff3b30; font-weight: 600; font-size: 16px; cursor: pointer; text-align: left; padding-left: 20px;">🗑️ Удалить</button>
+        </div>
+        <div class="close-sheet" onclick="closePostActionsSheet()">Отмена</div>
     </div>
 
     <!-- НИЖНЕЕ МЕНЮ -->
@@ -348,7 +397,6 @@
             <div class="nav-item active" id="nav-home" onclick="openMain()">
                 <span class="material-symbols-rounded">home</span>
             </div>
-            <!-- Новая иконка "Пульс" по центру -->
             <div class="nav-item" id="nav-feed" onclick="openFeed()">
                 <span class="material-symbols-rounded">graphic_eq</span>
             </div>
@@ -378,11 +426,31 @@
         document.getElementById('profile-name').innerText = userName;
         document.getElementById('profile-avatar').innerText = userName.charAt(0).toUpperCase();
 
-        // === ПУЛЬС (ЛЕНТА) ===
+        // === СИСТЕМА ЛИМИТОВ ===
+        function checkPostLimit() {
+            let today = new Date().toDateString();
+            let lastDate = localStorage.getItem('last_post_date');
+            let postCount = parseInt(localStorage.getItem('post_count_today')) || 0;
+            if (lastDate !== today) {
+                localStorage.setItem('last_post_date', today);
+                localStorage.setItem('post_count_today', 0);
+                return 0;
+            }
+            return postCount;
+        }
+        function incrementPostCount() {
+            let count = checkPostLimit();
+            localStorage.setItem('post_count_today', count + 1);
+        }
+
+        // === ЛЕНТА ===
         let feedPosts = JSON.parse(localStorage.getItem('rayon_feed')) || [
-            { id: 1, author: 'Совет дома', text: 'В эту субботу в 10:00 состоится субботник! Выходим чистить двор. За участие дадим по 100 баллов.', image: null, likes: 12, time: 'Сегодня, 09:41' },
-            { id: 2, author: 'Мария', text: 'Смотрите, какие красивые цветы расцвели у 3-го подъезда! 🌸', image: 'https://images.unsplash.com/photo-1490750967868-88cb44c3c70c?auto=format&fit=crop&w=500&q=60', likes: 24, time: 'Вчера, 18:20' }
+            { id: 1, author: 'Совет дома', text: 'В эту субботу в 10:00 состоится субботник!', image: null, likes: 12, time: 'Сегодня, 09:41', isMe: false },
+            { id: 2, author: 'Мария', text: 'Смотрите, какие красивые цветы расцвели у 3-го подъезда! 🌸', image: 'https://images.unsplash.com/photo-1490750967868-88cb44c3c70c?auto=format&fit=crop&w=500&q=60', likes: 24, time: 'Вчера, 18:20', isMe: false }
         ];
+
+        let editingPostId = null; // Переменная для хранения ID поста, который редактируем
+        let selectedPostIdForAction = null; // Для меню действий
 
         function renderFeed() {
             let container = document.getElementById('feed-container');
@@ -390,6 +458,9 @@
             
             feedPosts.forEach(post => {
                 let imageHtml = post.image ? `<img src="${post.image}" class="post-image">` : '';
+                // Показываем меню (три точки) только для своих постов
+                let menuBtnHtml = post.isMe ? `<span class="material-symbols-rounded post-menu-btn" onclick="openPostActions(${post.id})">more_vert</span>` : '';
+
                 container.innerHTML += `
                     <div class="feed-post">
                         <div class="post-header">
@@ -398,6 +469,7 @@
                                 <div class="post-author">${post.author}</div>
                                 <div class="post-time">${post.time}</div>
                             </div>
+                            ${menuBtnHtml}
                         </div>
                         ${imageHtml}
                         <div class="post-text">${post.text}</div>
@@ -423,25 +495,79 @@
             }
         }
 
+        // === УПРАВЛЕНИЕ ПОСТАМИ (СОЗДАНИЕ, РЕДАКТИРОВАНИЕ, УДАЛЕНИЕ) ===
         let postImageData = null;
-        function openCreatePostSheet() { document.getElementById('create-post-sheet').classList.add('open'); }
+
+        function openCreatePostSheet() { 
+            let count = checkPostLimit();
+            if (count >= 3) { tg.showAlert("Лимит: 3 поста в день."); return; }
+            
+            editingPostId = null;
+            document.getElementById('post-sheet-title').innerText = "Новый пост";
+            document.getElementById('save-post-btn').innerText = "Опубликовать";
+            document.getElementById('post-text-input').value = '';
+            document.getElementById('post-image-preview').style.display = 'none';
+            postImageData = null;
+            
+            document.getElementById('create-post-sheet').classList.add('open'); 
+        }
+
+        function openPostActions(id) {
+            selectedPostIdForAction = id;
+            document.getElementById('post-actions-sheet').classList.add('open');
+        }
+
+        function closePostActionsSheet() {
+            document.getElementById('post-actions-sheet').classList.remove('open');
+            selectedPostIdForAction = null;
+        }
+
+        function editPost() {
+            let post = feedPosts.find(p => p.id === selectedPostIdForAction);
+            if (!post) return;
+
+            editingPostId = post.id;
+            document.getElementById('post-sheet-title').innerText = "Редактировать пост";
+            document.getElementById('save-post-btn').innerText = "Сохранить";
+            document.getElementById('post-text-input').value = post.text;
+            
+            // Если есть картинка, показываем её
+            if (post.image) {
+                postImageData = post.image;
+                let img = document.getElementById('post-image-preview');
+                img.src = post.image;
+                img.style.display = 'block';
+            } else {
+                document.getElementById('post-image-preview').style.display = 'none';
+                postImageData = null;
+            }
+
+            closePostActionsSheet();
+            document.getElementById('create-post-sheet').classList.add('open');
+        }
+
+        function deletePost() {
+            if (!confirm("Вы уверены, что хотите удалить этот пост?")) return;
+            
+            feedPosts = feedPosts.filter(p => p.id !== selectedPostIdForAction);
+            localStorage.setItem('rayon_feed', JSON.stringify(feedPosts));
+            closePostActionsSheet();
+            renderFeed();
+            tg.showAlert("Пост удален");
+        }
+
         function closeCreatePostSheet() {
             document.getElementById('create-post-sheet').classList.remove('open');
             document.getElementById('post-text-input').value = '';
             document.getElementById('post-image-preview').style.display = 'none';
             postImageData = null;
+            editingPostId = null;
         }
 
         function previewPostImage(event) {
             let file = event.target.files[0];
             if (!file) return;
-            
-            // Проверка на видео (пока просто выводим сообщение)
-            if (file.type.startsWith('video/')) {
-                tg.showAlert("Видео можно будет добавлять после подключения сервера. Пока выберите фото.");
-                return;
-            }
-
+            if (file.type.startsWith('video/')) { tg.showAlert("Видео пока недоступно."); return; }
             let reader = new FileReader();
             reader.onload = function(e) {
                 postImageData = e.target.result;
@@ -452,29 +578,42 @@
             reader.readAsDataURL(file);
         }
 
-        function publishPost() {
+        function savePost() {
             let text = document.getElementById('post-text-input').value.trim();
             if (!text && !postImageData) { tg.showAlert("Напишите текст или добавьте фото"); return; }
 
             let now = new Date();
             let timeStr = "Сегодня, " + now.getHours() + ':' + now.getMinutes().toString().padStart(2, '0');
 
-            let newPost = {
-                id: Date.now(),
-                author: userName,
-                text: text,
-                image: postImageData,
-                likes: 0,
-                time: timeStr
-            };
+            if (editingPostId) {
+                // Редактирование существующего
+                let post = feedPosts.find(p => p.id === editingPostId);
+                if (post) {
+                    post.text = text;
+                    post.image = postImageData;
+                    post.time = timeStr; // Обновляем время
+                }
+                tg.showAlert("Пост обновлен!");
+            } else {
+                // Создание нового
+                let newPost = {
+                    id: Date.now(),
+                    author: userName,
+                    text: text,
+                    image: postImageData,
+                    likes: 0,
+                    time: timeStr,
+                    isMe: true
+                };
+                feedPosts.unshift(newPost);
+                updateScore(5, "Новый пост в Пульсе");
+                incrementPostCount();
+                tg.showAlert("Пост опубликован! +5 баллов");
+            }
 
-            feedPosts.unshift(newPost);
             localStorage.setItem('rayon_feed', JSON.stringify(feedPosts));
-            
             closeCreatePostSheet();
             renderFeed();
-            tg.showAlert("Пост опубликован! +10 баллов");
-            updateScore(10, "Новый пост в Пульсе");
         }
 
         // === БАЛЛЫ ===
@@ -504,7 +643,6 @@
             currentScore += amount;
             localStorage.setItem('rayon_score', currentScore);
             localStorage.setItem('rayon_problems', problemsCount);
-            
             let now = new Date();
             let timeStr = "Сегодня, " + now.getHours() + ':' + now.getMinutes().toString().padStart(2, '0');
             scoreHistory.unshift({ type: amount > 0 ? 'plus' : 'minus', amount: Math.abs(amount), title: title, date: timeStr });
@@ -586,6 +724,11 @@
             renderFeed();
         }
 
+        function openFriends() {
+            hideAllScreens();
+            document.getElementById('friends-screen').classList.add('active');
+        }
+
         function openMap() {
             hideAllScreens();
             document.getElementById('map-screen').classList.add('active');
@@ -596,7 +739,6 @@
         function openChats() {
             hideAllScreens();
             document.getElementById('chats-screen').classList.add('active');
-            // Чаты теперь не в нижнем меню, поэтому просто показываем экран
         }
 
         function openProfile() {
