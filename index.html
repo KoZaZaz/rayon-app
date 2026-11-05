@@ -7,6 +7,9 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=b91b8274-1abf-4c6f-abe0-969e6d16b55e" type="text/javascript"></script>
     
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#5856d6">
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0');
         :root {
@@ -41,14 +44,15 @@
         .name { font-size: 18px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;}
         .bell-icon { background: white; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer; color: var(--text-main); }
         
-        .balance-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 24px; padding: 24px; color: white; margin-bottom: 24px; box-shadow: 0 12px 24px rgba(118, 75, 162, 0.3); position: relative; overflow: hidden; }
+        .balance-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 24px; padding: 24px; color: white; margin-bottom: 24px; box-shadow: 0 12px 24px rgba(118, 75, 162, 0.3); position: relative; overflow: hidden; cursor: pointer; transition: transform 0.2s; }
+        .balance-card:active { transform: scale(0.98); }
         .balance-card::before { content: ''; position: absolute; top: -50px; right: -30px; width: 150px; height: 150px; background: rgba(255,255,255,0.15); border-radius: 50%; }
         .balance-card::after { content: ''; position: absolute; bottom: -40px; left: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; }
         .balance-title { font-size: 14px; opacity: 0.9; font-weight: 500; display: flex; align-items: center; gap: 8px; }
         .balance-amount { font-size: 40px; font-weight: 800; margin: 8px 0 16px 0; letter-spacing: -1px; display: flex; align-items: center; gap: 8px;}
         .level-info { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
         .progress-bar-bg { background: rgba(255,255,255,0.25); height: 10px; border-radius: 5px; overflow: hidden; }
-        .progress-bar-fill { background: #fff; width: 65%; height: 100%; border-radius: 5px; }
+        .progress-bar-fill { background: #fff; height: 100%; border-radius: 5px; transition: width 0.5s ease; }
         
         .section-title { font-size: 20px; font-weight: 800; margin-bottom: 16px; margin-top: 28px; display: flex; justify-content: space-between; align-items: flex-end; }
         .section-title span { font-size: 14px; color: var(--accent); font-weight: 600; cursor: pointer; }
@@ -77,35 +81,21 @@
         
         .map-container { display: none; height: 75vh; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.1); position: relative; }
         .back-btn { position: absolute; top: 16px; left: 16px; background: white; padding: 8px 16px; border-radius: 20px; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.2); cursor: pointer; z-index: 10; }
-        
         .add-btn { position: absolute; bottom: 16px; right: 16px; background: var(--accent); color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(88, 86, 214, 0.4); cursor: pointer; z-index: 10; transition: 0.2s; }
         .add-btn:active { transform: scale(0.9); }
-
         .geo-btn { position: absolute; top: 16px; right: 16px; background: white; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); cursor: pointer; z-index: 10; color: var(--accent); transition: 0.2s; }
         .geo-btn:active { transform: scale(0.9); }
 
         .category-sheet { position: fixed; bottom: -100%; left: 0; right: 0; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-radius: 24px 24px 0 0; padding: 24px; box-shadow: 0 -10px 30px rgba(0,0,0,0.1); transition: bottom 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 200; }
         .category-sheet.open { bottom: 0; }
         .category-sheet h3 { margin: 0 0 16px 0; font-size: 18px; text-align: center; }
-        
-        .desc-input {
-            width: 100%;
-            padding: 14px;
-            border-radius: 16px;
-            border: 1px solid #ddd;
-            background: #f2f4f7;
-            font-size: 15px;
-            margin-bottom: 16px;
-            outline: none;
-            font-family: inherit;
-        }
+        .desc-input { width: 100%; padding: 14px; border-radius: 16px; border: 1px solid #ddd; background: #f2f4f7; font-size: 15px; margin-bottom: 16px; outline: none; font-family: inherit; }
 
         .category-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .category-item { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; border-radius: 16px; background: #f2f4f7; cursor: pointer; transition: 0.2s; }
         .category-item:active { transform: scale(0.95); }
         .category-item .material-symbols-rounded { font-size: 32px; margin-bottom: 8px; }
         .category-item span:last-child { font-weight: 600; font-size: 13px; }
-        
         .cat-repair { color: #ff3b30; background: #ffebee; }
         .cat-eco { color: #34c759; background: #e8f5e9; }
         .cat-help { color: #ff9500; background: #fff3cd; }
@@ -133,6 +123,16 @@
         .chat-input-area { padding: 10px; background: white; display: flex; gap: 10px; border-top: 1px solid #eee; }
         .chat-input { flex-grow: 1; padding: 12px; border-radius: 20px; border: 1px solid #ddd; background: #f2f4f7; outline: none; font-size: 14px; }
         .chat-send-btn { width: 44px; height: 44px; border-radius: 50%; background: var(--accent); border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+        /* СТИЛИ ДЛЯ ИСТОРИИ БАЛЛОВ */
+        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: white; border-radius: 16px; margin-bottom: 10px; border: 1px solid #eee; }
+        .history-left { display: flex; align-items: center; gap: 12px; }
+        .history-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .history-title { font-weight: 600; font-size: 15px; }
+        .history-date { font-size: 12px; color: var(--text-muted); }
+        .history-amount { font-weight: 800; font-size: 18px; }
+        .amount-plus { color: #34c759; }
+        .amount-minus { color: #ff3b30; }
     </style>
 </head>
 <body>
@@ -156,18 +156,19 @@
             </div>
         </div>
 
-        <div class="balance-card">
+        <!-- Карточка баллов (теперь кликабельная) -->
+        <div class="balance-card" onclick="openHistory()">
             <div class="balance-title">
                 <span class="material-symbols-rounded" style="font-size: 18px;">auto_awesome</span>
-                Твои баллы за заботу о районе
+                Твои баллы (нажми, чтобы увидеть историю)
             </div>
             <div class="balance-amount"><span id="user-balance">0</span> <span class="material-symbols-rounded" style="font-size: 36px; color: #ffd700;">star</span></div>
             <div class="level-info">
                 <span>Уровень: Активист</span>
-                <span>650 / 1000</span>
+                <span id="level-progress-text">0 / 1000</span>
             </div>
             <div class="progress-bar-bg">
-                <div class="progress-bar-fill"></div>
+                <div class="progress-bar-fill" id="level-progress-bar" style="width: 0%;"></div>
             </div>
         </div>
 
@@ -192,7 +193,6 @@
         </div>
 
         <div class="section-title">Лента района <span>Все</span></div>
-        
         <div class="feed-card">
             <div class="feed-icon" style="background:#e5f0ff; color:#007aff;"><span class="material-symbols-rounded">campaign</span></div>
             <div class="feed-content">
@@ -202,15 +202,21 @@
         </div>
     </div> 
 
+    <!-- ЭКРАН ИСТОРИИ БАЛЛОВ -->
+    <div id="history-screen" class="screen">
+        <div class="section-title">История баллов</div>
+        <div id="history-list">
+            <!-- Сюда будут добавляться записи -->
+        </div>
+    </div>
+
     <!-- ЭКРАН КАРТЫ -->
     <div id="map-screen" class="screen map-container">
         <div id="yandex-map" style="width: 100%; height: 100%;"></div>
         <div onclick="openMain()" class="back-btn">← Назад</div>
-        
         <div onclick="findMe()" class="geo-btn">
             <span class="material-symbols-rounded">my_location</span>
         </div>
-
         <div onclick="addMarkerAtCenter()" class="add-btn">
             <span class="material-symbols-rounded">add_location_alt</span>
         </div>
@@ -255,9 +261,48 @@
     <!-- ЭКРАН ПРОФИЛЯ -->
     <div id="profile-screen" class="screen">
         <div class="section-title">Мой профиль</div>
-        <div class="action-card" style="text-align: center; padding: 40px;">
-            <span class="material-symbols-rounded" style="font-size: 64px; color: var(--accent);">person</span>
-            <div class="action-text" style="margin-top: 16px;">Тут будет твой профиль</div>
+        <div class="action-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 24px;">
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <div class="avatar" id="profile-avatar" style="width: 64px; height: 64px; font-size: 28px; border-radius: 20px; background: rgba(255,255,255,0.2); box-shadow: none;"></div>
+                <div>
+                    <div style="font-size: 22px; font-weight: 800;" id="profile-name">Загрузка...</div>
+                    <div style="font-size: 14px; opacity: 0.9; margin-top: 4px;">Уровень: Активист</div>
+                </div>
+            </div>
+            <div style="margin-top: 24px;">
+                <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 8px;">
+                    <span>До следующего уровня</span>
+                    <span id="profile-level-text">0 / 1000</span>
+                </div>
+                <div style="background: rgba(255,255,255,0.3); height: 8px; border-radius: 4px; overflow: hidden;">
+                    <div id="profile-progress-bar" style="background: white; width: 0%; height: 100%; border-radius: 4px; transition: width 0.5s ease;"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Кнопка подарить баллы -->
+        <div class="action-card" style="margin-top: 16px; flex-direction: row; align-items: center; justify-content: space-between;" onclick="openGiftSheet()">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="action-icon" style="background: #fff3cd; color: #ff9500;"><span class="material-symbols-rounded">card_giftcard</span></div>
+                <div class="action-text">Подарить баллы соседу</div>
+            </div>
+            <span class="material-symbols-rounded" style="color: var(--text-muted);">chevron_right</span>
+        </div>
+
+        <div class="section-title" style="font-size: 18px; margin-top: 24px;">Моя статистика</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+            <div class="action-card" style="text-align: center; padding: 12px; gap: 4px;">
+                <div style="font-size: 24px; font-weight: 800; color: var(--accent);" id="stat-problems">0</div>
+                <div style="font-size: 11px; color: var(--text-muted);">Проблем</div>
+            </div>
+            <div class="action-card" style="text-align: center; padding: 12px; gap: 4px;">
+                <div style="font-size: 24px; font-weight: 800; color: #34c759;">0</div>
+                <div style="font-size: 11px; color: var(--text-muted);">Помощи</div>
+            </div>
+            <div class="action-card" style="text-align: center; padding: 12px; gap: 4px;">
+                <div style="font-size: 24px; font-weight: 800; color: #ff9500;">0</div>
+                <div style="font-size: 11px; color: var(--text-muted);">Деревьев</div>
+            </div>
         </div>
     </div>
 
@@ -265,26 +310,23 @@
     <div id="category-sheet" class="category-sheet">
         <h3>Что вы хотите отметить?</h3>
         <input type="text" id="problem-desc" class="desc-input" placeholder="Добавьте описание (например: 'Яма у 3 подъезда')">
-        
         <div class="category-grid">
-            <div class="category-item" onclick="selectCategory('repair')">
-                <span class="material-symbols-rounded cat-repair">build</span>
-                <span>Ремонт</span>
-            </div>
-            <div class="category-item" onclick="selectCategory('eco')">
-                <span class="material-symbols-rounded cat-eco">eco</span>
-                <span>Экология</span>
-            </div>
-            <div class="category-item" onclick="selectCategory('help')">
-                <span class="material-symbols-rounded cat-help">volunteer_activism</span>
-                <span>Помощь</span>
-            </div>
-            <div class="category-item" onclick="selectCategory('security')">
-                <span class="material-symbols-rounded cat-security">shield</span>
-                <span>Безопасность</span>
-            </div>
+            <div class="category-item" onclick="selectCategory('repair')"><span class="material-symbols-rounded cat-repair">build</span><span>Ремонт</span></div>
+            <div class="category-item" onclick="selectCategory('eco')"><span class="material-symbols-rounded cat-eco">eco</span><span>Экология</span></div>
+            <div class="category-item" onclick="selectCategory('help')"><span class="material-symbols-rounded cat-help">volunteer_activism</span><span>Помощь</span></div>
+            <div class="category-item" onclick="selectCategory('security')"><span class="material-symbols-rounded cat-security">shield</span><span>Безопасность</span></div>
         </div>
         <div class="close-sheet" onclick="hideCategorySheet()">Отмена</div>
+    </div>
+
+    <!-- МЕНЮ ПОДАРКА БАЛЛОВ -->
+    <div id="gift-sheet" class="category-sheet">
+        <h3>Подарить баллы соседу</h3>
+        <p style="font-size: 13px; color: var(--text-muted); text-align: center; margin-bottom: 16px;">Лимит: 100 баллов в день</p>
+        <input type="number" id="gift-amount" class="desc-input" placeholder="Сколько баллов подарить? (макс. 100)" min="1" max="100">
+        <input type="text" id="gift-reason" class="desc-input" placeholder="За что? (например: 'Спасибо за дрель')">
+        <button onclick="sendGift()" style="width: 100%; padding: 16px; border-radius: 16px; border: none; background: var(--accent); color: white; font-weight: 700; font-size: 16px; cursor: pointer;">Отправить подарок</button>
+        <div class="close-sheet" onclick="closeGiftSheet()">Отмена</div>
     </div>
 
     <!-- НИЖНЕЕ МЕНЮ -->
@@ -311,21 +353,124 @@
         tg.expand();
         tg.setHeaderColor('#f2f4f7');
 
-        let userName = tg.initDataUnsafe?.user?.first_name;
-        if (userName) {
-            document.getElementById('user-name').innerText = userName;
-            document.getElementById('user-avatar').innerText = userName.charAt(0).toUpperCase();
-        } else {
-            document.getElementById('user-name').innerText = "Гость";
-            document.getElementById('user-avatar').innerText = "Г";
+        let userName = tg.initDataUnsafe?.user?.first_name || "Гость";
+        document.getElementById('user-name').innerText = userName;
+        document.getElementById('user-avatar').innerText = userName.charAt(0).toUpperCase();
+        document.getElementById('profile-name').innerText = userName;
+        document.getElementById('profile-avatar').innerText = userName.charAt(0).toUpperCase();
+
+        // === СИСТЕМА БАЛЛОВ И ИСТОРИЯ ===
+        let currentScore = parseInt(localStorage.getItem('rayon_score')) || 0;
+        let problemsCount = parseInt(localStorage.getItem('rayon_problems')) || 0;
+        
+        // История (сохраняем в память)
+        let scoreHistory = JSON.parse(localStorage.getItem('rayon_history')) || [
+            { type: 'plus', amount: 150, title: 'Стартовый бонус', date: 'Сегодня, 09:00' }
+        ];
+
+        function updateScore(amount, title) {
+            if (amount > 0 && amount === 10) problemsCount++; 
+            
+            currentScore += amount;
+            localStorage.setItem('rayon_score', currentScore);
+            localStorage.setItem('rayon_problems', problemsCount);
+            
+            // Добавляем в историю
+            let now = new Date();
+            let timeStr = "Сегодня, " + now.getHours() + ':' + now.getMinutes().toString().padStart(2, '0');
+            
+            scoreHistory.unshift({
+                type: amount > 0 ? 'plus' : 'minus',
+                amount: Math.abs(amount),
+                title: title,
+                date: timeStr
+            });
+            
+            localStorage.setItem('rayon_history', JSON.stringify(scoreHistory));
+            updateUI();
         }
-        document.getElementById('user-balance').innerText = "150";
+
+        function updateUI() {
+            document.getElementById('user-balance').innerText = currentScore;
+            
+            let currentLevelScore = currentScore % 1000;
+            let levelPercent = currentLevelScore / 10;
+            
+            document.getElementById('level-progress-text').innerText = `${currentLevelScore} / 1000`;
+            document.getElementById('level-progress-bar').style.width = `${levelPercent}%`;
+            
+            document.getElementById('profile-level-text').innerText = `${currentLevelScore} / 1000`;
+            document.getElementById('profile-progress-bar').style.width = `${levelPercent}%`;
+            document.getElementById('stat-problems').innerText = problemsCount;
+            
+            renderHistory();
+        }
+
+        function renderHistory() {
+            let list = document.getElementById('history-list');
+            list.innerHTML = '';
+            
+            scoreHistory.forEach(item => {
+                let isPlus = item.type === 'plus';
+                let sign = isPlus ? '+' : '-';
+                let colorClass = isPlus ? 'amount-plus' : 'amount-minus';
+                let iconBg = isPlus ? '#e8f5e9' : '#ffebee';
+                let iconColor = isPlus ? '#34c759' : '#ff3b30';
+                let iconName = isPlus ? 'add_circle' : 'remove_circle';
+
+                list.innerHTML += `
+                    <div class="history-item">
+                        <div class="history-left">
+                            <div class="history-icon" style="background: ${iconBg}; color: ${iconColor};">
+                                <span class="material-symbols-rounded">${iconName}</span>
+                            </div>
+                            <div>
+                                <div class="history-title">${item.title}</div>
+                                <div class="history-date">${item.date}</div>
+                            </div>
+                        </div>
+                        <div class="history-amount ${colorClass}">${sign}${item.amount}</div>
+                    </div>
+                `;
+            });
+        }
+
+        // Открытие экрана истории
+        function openHistory() {
+            hideAllScreens();
+            document.getElementById('history-screen').classList.add('active');
+            // Убираем активную кнопку меню, так как истории нет в меню
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        }
+
+        // Меню подарка
+        function openGiftSheet() {
+            document.getElementById('gift-sheet').classList.add('open');
+        }
+        function closeGiftSheet() {
+            document.getElementById('gift-sheet').classList.remove('open');
+        }
+
+        function sendGift() {
+            let amount = parseInt(document.getElementById('gift-amount').value);
+            let reason = document.getElementById('gift-reason').value.trim();
+            
+            if (!amount || amount <= 0) { tg.showAlert("Введите сумму больше 0"); return; }
+            if (amount > 100) { tg.showAlert("Максимум 100 баллов за раз"); return; }
+            if (amount > currentScore) { tg.showAlert("У вас недостаточно баллов"); return; }
+            if (!reason) reason = "Подарок соседу";
+
+            updateScore(-amount, `Подарок: ${reason}`);
+            tg.showAlert("🎁 Подарок отправлен!");
+            closeGiftSheet();
+        }
+
+        updateUI();
 
         let myMap;
         let mapInitialized = false;
         let tempCoords = null; 
 
-        // --- НАВИГАЦИЯ ---
         function hideAllScreens() {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -365,7 +510,6 @@
             closeChat();
         }
 
-        // --- КАРТА ---
         function initMap() {
             myMap = new ymaps.Map("yandex-map", {
                 center: [55.751244, 37.618423],
@@ -383,41 +527,18 @@
             });
         }
 
-        // --- ГЕОЛОКАЦИЯ (НАДЕЖНЫЙ МЕТОД) ---
         function findMe() {
             if (!myMap) return;
-
-            if (!navigator.geolocation) {
-                tg.showAlert("Ваш браузер не поддерживает геолокацию.");
-                return;
-            }
-
-            tg.showAlert("Ищем ваше местоположение...");
-
+            if (!navigator.geolocation) { tg.showAlert("Нет поддержки геолокации."); return; }
             navigator.geolocation.getCurrentPosition(
                 function(position) {
-                    var lat = position.coords.latitude;
-                    var lon = position.coords.longitude;
-                    
+                    let lat = position.coords.latitude;
+                    let lon = position.coords.longitude;
                     myMap.setCenter([lat, lon], 17);
-                    
-                    var myPlacemark = new ymaps.Placemark([lat, lon], {
-                        hintContent: 'Вы здесь'
-                    }, {
-                        preset: 'islands#blueDotIconWithCaption'
-                    });
+                    let myPlacemark = new ymaps.Placemark([lat, lon], { hintContent: 'Вы здесь' }, { preset: 'islands#blueDotIconWithCaption' });
                     myMap.geoObjects.add(myPlacemark);
-                    
-                    tg.showAlert("📍 Местоположение найдено!");
                 },
-                function(error) {
-                    let errorMsg = "Ошибка геолокации.";
-                    if (error.code === 1) errorMsg = "Вы запретили доступ к геопозиции. Разрешите его в настройках браузера.";
-                    if (error.code === 2) errorMsg = "Не удалось определить местоположение (нет сигнала GPS).";
-                    if (error.code === 3) errorMsg = "Превышено время ожидания ответа от GPS.";
-                    
-                    tg.showAlert(errorMsg);
-                },
+                function(error) { tg.showAlert("Ошибка GPS: проверьте разрешения."); },
                 { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
             );
         }
@@ -439,16 +560,19 @@
             if (!tempCoords) return;
 
             let userDesc = document.getElementById('problem-desc').value.trim();
-            
             let title, defaultDesc;
-            if (type === 'repair') { title = 'Проблема (Ремонт)'; defaultDesc = 'Нужен ремонт.'; }
+            if (type === 'repair') { title = 'Ремонт'; defaultDesc = 'Нужен ремонт.'; }
             if (type === 'eco') { title = 'Экология'; defaultDesc = 'Вопрос по экологии.'; }
-            if (type === 'help') { title = 'Нужна помощь'; defaultDesc = 'Требуется помощь.'; }
+            if (type === 'help') { title = 'Помощь'; defaultDesc = 'Требуется помощь.'; }
             if (type === 'security') { title = 'Безопасность'; defaultDesc = 'Вопрос безопасности.'; }
 
             let finalDesc = userDesc ? userDesc : defaultDesc;
 
             addMarkerToMap(tempCoords, type, title, finalDesc);
+            
+            // Начисляем 10 баллов и пишем в историю
+            updateScore(10, `Новая метка: ${title}`);
+            
             tempCoords = null;
         }
 
@@ -480,16 +604,10 @@
             myMap.geoObjects.add(placemark);
         }
 
-        // --- ЧАТЫ ---
         let currentChatId = null;
         let chatHistory = {
-            'user_2': [
-                { sender: 'user_2', text: 'Привет! Выйдешь на субботник?', time: '10:45' },
-                { sender: 'me', text: 'Привет, да, планирую!', time: '10:46' }
-            ],
-            'user_3': [
-                { sender: 'user_3', text: 'Одолжи дрель, пожалуйста', time: 'Вчера' }
-            ]
+            'user_2': [ { sender: 'user_2', text: 'Привет! Выйдешь на субботник?', time: '10:45' } ],
+            'user_3': [ { sender: 'user_3', text: 'Одолжи дрель, пожалуйста', time: 'Вчера' } ]
         };
 
         function openChat(userId, name) {
@@ -510,15 +628,11 @@
             const container = document.getElementById('chat-messages-container');
             container.innerHTML = '';
             let messages = chatHistory[userId] || [];
-            
             messages.forEach(msg => {
                 let isMe = msg.sender === 'me';
                 let msgDiv = document.createElement('div');
                 msgDiv.className = `message ${isMe ? 'outgoing' : 'incoming'}`;
-                msgDiv.innerHTML = `
-                    ${msg.text}
-                    <div class="message-time">${msg.time}</div>
-                `;
+                msgDiv.innerHTML = `${msg.text}<div class="message-time">${msg.time}</div>`;
                 container.appendChild(msgDiv);
             });
             container.scrollTop = container.scrollHeight;
@@ -531,7 +645,6 @@
 
             let now = new Date();
             let timeStr = now.getHours() + ':' + now.getMinutes().toString().padStart(2, '0');
-            
             if (!chatHistory[currentChatId]) chatHistory[currentChatId] = [];
             chatHistory[currentChatId].push({ sender: 'me', text: text, time: timeStr });
 
@@ -539,15 +652,12 @@
             renderMessages(currentChatId);
             
             setTimeout(() => {
-                let botReply = "Понял тебя! Это тестовый ответ от соседа.";
-                chatHistory[currentChatId].push({ sender: currentChatId, text: botReply, time: timeStr });
+                chatHistory[currentChatId].push({ sender: currentChatId, text: "Понял тебя! Это тестовый ответ.", time: timeStr });
                 renderMessages(currentChatId);
             }, 1500);
         }
 
-        function handleKeyPress(e) {
-            if (e.key === 'Enter') sendMessage();
-        }
+        function handleKeyPress(e) { if (e.key === 'Enter') sendMessage(); }
     </script>
 </body>
 </html>
