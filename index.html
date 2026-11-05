@@ -37,12 +37,11 @@
         .bg-blob-3 { bottom: 10%; left: 10%; width: 300px; height: 300px; background: #84fab0; animation: float 12s infinite alternate; }
         @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(20px, 20px) scale(1.1); } }
         
-        /* Стили для экрана входа */
+        /* ЭКРАН ВХОДА */
         #auth-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 80vh; }
         .auth-card { background: white; padding: 32px; border-radius: 32px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
         .auth-title { font-size: 32px; font-weight: 900; color: var(--accent); margin-bottom: 8px; }
         .auth-subtitle { color: var(--text-muted); margin-bottom: 24px; font-size: 14px; }
-        
         .auth-input { width: 100%; padding: 16px; border-radius: 16px; border: 1px solid #ddd; background: #f2f4f7; font-size: 16px; margin-bottom: 12px; outline: none; font-family: inherit; }
         .auth-btn { width: 100%; padding: 16px; border-radius: 16px; border: none; background: var(--accent); color: white; font-weight: 700; font-size: 16px; cursor: pointer; margin-top: 8px; }
 
@@ -158,7 +157,7 @@
             100% { transform: scale(1); }
         }
 
-        .create-post-btn { position: fixed; bottom: 100px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(88, 86, 214, 0.4); cursor: pointer; z-index: 150; }
+        .create-post-btn { position: fixed; bottom: 100px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(88, 86, 214, 0.4); cursor: pointer; z-index: 150; display: none; }
         .create-post-btn:active { transform: scale(0.9); }
         #post-file-input { display: none; }
         .post-preview { width: 100%; border-radius: 12px; margin-bottom: 12px; display: none; }
@@ -437,7 +436,7 @@
     </div>
 
     <!-- Плавающая кнопка создания поста -->
-    <div id="create-post-btn" class="create-post-btn" style="display: none;" onclick="openCreatePostSheet()">
+    <div id="create-post-btn" class="create-post-btn" onclick="openCreatePostSheet()">
         <span class="material-symbols-rounded">add</span>
     </div>
 
@@ -455,6 +454,7 @@
         };
 
         let currentUserNick = localStorage.getItem('current_user_nick') || null;
+        let userName = "Гость"; 
 
         // === АВТОРИЗАЦИЯ ===
         function handleAuth() {
@@ -474,9 +474,10 @@
             }
 
             currentUserNick = login;
+            userName = usersDB[login].name;
             localStorage.setItem('current_user_nick', currentUserNick);
             
-            updateUserInterface(usersDB[login].name, usersDB[login].nick);
+            updateUserInterface(userName, usersDB[login].nick);
             showMainApp();
         }
 
@@ -489,55 +490,25 @@
         }
 
         function showMainApp() {
-            // ЖЕСТКО СКРЫВАЕМ ЭКРАН РЕГИСТРАЦИИ
-            let authScreen = document.getElementById('auth-screen');
-            if (authScreen) {
-                authScreen.style.display = 'none'; 
-                authScreen.classList.remove('active');
-            }
-
-            // ПОКАЗЫВАЕМ ГЛАВНЫЙ ЭКРАН
-            let mainScreen = document.getElementById('main-screen');
-            if (mainScreen) {
-                mainScreen.style.display = 'block'; 
-                mainScreen.classList.add('active');
-            }
-
-            // ПОКАЗЫВАЕМ НИЖНЕЕ МЕНЮ
-            let navWrapper = document.querySelector('.bottom-nav-wrapper');
-            if (navWrapper) {
-                navWrapper.style.display = 'block';
-            }
-
-            // Активируем вкладку "Главная"
-            let navHome = document.getElementById('nav-home');
-            if (navHome) navHome.classList.add('active');
-
-            // Обновляем данные
+            // СКРЫВАЕМ ЭКРАН РЕГИСТРАЦИИ И ПОКАЗЫВАЕМ ГЛАВНЫЙ
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('main-screen').style.display = 'block';
+            document.querySelector('.bottom-nav-wrapper').style.display = 'block';
+            document.getElementById('nav-home').classList.add('active');
+            
             updateUI();
             renderFeed();
         }
 
         // Проверка при старте
         if (currentUserNick && usersDB[currentUserNick]) {
-            updateUserInterface(usersDB[currentUserNick].name, usersDB[currentUserNick].nick);
+            userName = usersDB[currentUserNick].name;
+            updateUserInterface(userName, usersDB[currentUserNick].nick);
             showMainApp();
         } else {
-            // Если не залогинен — показываем регистрацию, скрываем всё остальное
-            let authScreen = document.getElementById('auth-screen');
-            if (authScreen) {
-                authScreen.style.display = 'flex';
-                authScreen.classList.add('active');
-            }
-            
-            let mainScreen = document.getElementById('main-screen');
-            if (mainScreen) {
-                mainScreen.style.display = 'none';
-                mainScreen.classList.remove('active');
-            }
-
-            let navWrapper = document.querySelector('.bottom-nav-wrapper');
-            if (navWrapper) navWrapper.style.display = 'none';
+            document.getElementById('auth-screen').style.display = 'flex';
+            document.getElementById('main-screen').style.display = 'none';
+            document.querySelector('.bottom-nav-wrapper').style.display = 'none';
         }
 
         // === ПОИСК ДРУЗЕЙ ===
