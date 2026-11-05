@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RAYON - Мой район</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=b91b8274-1abf-4c6f-abe0-969e6d16b55e" type="text/javascript"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0');
+        :root {
+            --text-main: #1c1c1e; --text-muted: #8e8e93;
+            --bg-glass: rgba(255, 255, 255, 0.65);
+            --border-glass: rgba(255, 255, 255, 0.4);
+            --accent: #5856d6;
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background-color: #f2f4f7; color: var(--text-main);
+            margin: 0; padding: 16px; padding-bottom: 100px;
+            min-height: 100vh; position: relative; overflow-x: hidden;
+        }
+        .material-symbols-rounded {
+            font-family: 'Material Symbols Rounded'; font-weight: normal; font-style: normal;
+            font-size: 24px; line-height: 1; letter-spacing: normal; text-transform: none;
+            display: inline-block; white-space: nowrap; word-wrap: normal; direction: ltr;
+            -webkit-font-feature-settings: 'liga'; -webkit-font-smoothing: antialiased; user-select: none;
+        }
+        .bg-blob-1, .bg-blob-2, .bg-blob-3 { position: fixed; border-radius: 50%; filter: blur(50px); z-index: -1; opacity: 0.6; }
+        .bg-blob-1 { top: -50px; left: -50px; width: 250px; height: 250px; background: #ff9a9e; animation: float 10s infinite alternate; }
+        .bg-blob-2 { top: 30%; right: -50px; width: 200px; height: 200px; background: #a18cd1; animation: float 8s infinite alternate-reverse; }
+        .bg-blob-3 { bottom: 10%; left: 10%; width: 300px; height: 300px; background: #84fab0; animation: float 12s infinite alternate; }
+        @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(20px, 20px) scale(1.1); } }
+        .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; background: var(--bg-glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); padding: 12px 16px; border-radius: 20px; border: 1px solid var(--border-glass); box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
+        .user-info { display: flex; align-items: center; gap: 12px; }
+        .avatar { width: 46px; height: 46px; background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; color: white; box-shadow: 0 4px 12px rgba(255, 117, 140, 0.4); }
+        .greeting { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+        .name { font-size: 18px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
+        .bell-icon { background: white; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer; color: var(--text-main); }
+        .balance-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 24px; padding: 24px; color: white; margin-bottom: 24px; box-shadow: 0 12px 24px rgba(118, 75, 162, 0.3); position: relative; overflow: hidden; }
+        .balance-card::before { content: ''; position: absolute; top: -50px; right: -30px; width: 150px; height: 150px; background: rgba(255,255,255,0.15); border-radius: 50%; }
+        .balance-card::after { content: ''; position: absolute; bottom: -40px; left: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; }
+        .balance-title { font-size: 14px; opacity: 0.9; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+        .balance-amount { font-size: 40px; font-weight: 800; margin: 8px 0 16px 0; letter-spacing: -1px; display: flex; align-items: center; gap: 8px; }
+        .level-info { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+        .progress-bar-bg { background: rgba(255,255,255,0.25); height: 10px; border-radius: 5px; overflow: hidden; }
+        .progress-bar-fill { background: #fff; width: 65%; height: 100%; border-radius: 5px; }
+        .section-title { font-size: 20px; font-weight: 800; margin-bottom: 16px; margin-top: 28px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .section-title span { font-size: 14px; color: var(--accent); font-weight: 600; cursor: pointer; }
+        .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .action-card { background: var(--bg-glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--border-glass); border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.02); cursor: pointer; transition: transform 0.15s ease, background 0.2s; }
+        .action-card:active { transform: scale(0.95); background: rgba(255,255,255,0.8); }
+        .action-icon { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 16px; }
+        .icon-map { background: #e5f0ff; color: #007aff; }
+        .icon-cam { background: #ffebee; color: #ff3b30; }
+        .icon-help { background: #fff3cd; color: #ff9500; }
+        .icon-gift { background: #e8f5e9; color: #34c759; }
+        .action-text { font-weight: 700; font-size: 15px; }
+        .feed-card { background: var(--bg-glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--border-glass); border-radius: 20px; padding: 16px; margin-bottom: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.02); display: flex; gap: 14px; cursor: pointer; }
+        .feed-icon { width: 44px; height: 44px; min-width: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
+        .feed-content { flex-grow: 1; }
+        .feed-text { font-size: 14px; line-height: 1.45; margin-bottom: 8px; color: #2c2c2e; }
+        .feed-time { font-size: 12px; color: var(--text-muted); font-weight: 500; display: flex; align-items: center; gap: 8px; }
+        .bottom-nav-wrapper { position: fixed; bottom: 20px; left: 16px; right: 16px; z-index: 100; }
+        .bottom-nav { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--border-glass); display: flex; justify-content: space-around; padding: 12px 8px; border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+        .nav-item { text-align: center; font-size: 11px; font-weight: 600; color: var(--text-muted); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: 0.2s; }
+        .nav-item span.material-symbols-rounded { transition: 0.2s; opacity: 0.6; }
+        .nav-item.active { color: var(--accent); }
+        .nav-item.active span.material-symbols-rounded { transform: translateY(-2px) scale(1.1); opacity: 1; color: var(--accent); }
+        .map-container { display: none; height: 75vh; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.1); position: relative; }
+        .back-btn { position: absolute; top: 16px; left: 16px; background: white; padding: 8px 16px; border-radius: 20px; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.2); cursor: pointer; z-index: 10; }
+        .add-btn { position: absolute; bottom: 16px; right: 16px; background: var(--accent); color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(88, 86, 214, 0.4); cursor: pointer; z-index: 10; transition: 0.2s; }
+        .add-btn:active { transform: scale(0.9); }
+        .category-sheet { position: fixed; bottom: -100%; left: 0; right: 0; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-radius: 24px 24px 0 0; padding: 24px; box-shadow: 0 -10px 30px rgba(0,0,0,0.1); transition: bottom 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 200; }
+        .category-sheet.open { bottom: 0; }
+        .category-sheet h3 { margin: 0 0 16px 0; font-size: 18px; text-align: center; }
+        .category-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .category-item { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; border-radius: 16px; background: #f2f4f7; cursor: pointer; transition: 0.2s; }
+        .category-item:active { transform: scale(0.95); }
+        .category-item .material-symbols-rounded { font-size: 32px; margin-bottom: 8px; }
+        .category-item span:last-child { font-weight: 600; font-size: 13px; }
+        .cat-repair { color: #ff3b30; background: #ffebee; }
+        .cat-eco { color: #34c759; background: #e8f5e9; }
+        .cat-help { color: #ff9500; background: #fff3cd; }
+        .cat-security { color: #007aff; background: #e5f0ff; }
+        .close-sheet { text-align: center; color: #8e8e93; font-weight: 600; margin-top: 16px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="bg-blob-1"></div>
+    <div class="bg-blob-2"></div>
+    <div class="bg-blob-3"></div>
+    <div id="main-screen">
+        <div class="top-header">
+            <div class="user-info">
+                <div class="avatar" id="user-avatar"></div>
+                <div>
+                    <div class="greeting">Добрый день,</div>
+                    <div class="name" id="user-name">Загрузка...</div>
+                </div>
+            </div>
+            <div class="bell-icon" onclick="tg.showAlert('У вас 2 новых уведомления!')">
+                <span class="material-symbols-rounded" style="font-size: 22px;">notifications</span>
+            </div>
+        </div>
+        <div class="balance-card">
+            <div class="balance-title">
+                <span class="material-symbols-rounded" style="font-size: 18px;">auto_awesome</span>
+                Твои баллы за заботу о районе
+            </div>
+            <div class="balance-amount"><span id="user-balance">0</span> <span class="material-symbols-rounded" style="font-size: 36px; color: #ffd700;">star</span></div>
+            <div class="level-info">
+                <span>Уровень: Активист</span>
+                <span>650 / 1000</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill"></div>
+            </div>
+        </div>
+        <div class="section-title">Быстрые действия</div>
+        <div class="actions-grid">
+            <div class="action-card" onclick="openMap()">
+                <div class="action-icon icon-map"><span class="material-symbols-rounded">map</span></div>
+                <div class="action-text">Карта района</div>
+            </div>
+            <div class="action-card" onclick="openMap(); addMarkerAtCenter();">
+                <div class="action-icon icon-cam"><span class="material-symbols-rounded">photo_camera</span></div>
+                <div class="action-text">Сообщить о проблеме</div>
+            </div>
+            <div class="action-card" onclick="tg.showAlert('Список соседей!')">
+                <div class="action-icon icon-help"><span class="material-symbols-rounded">group</span></div>
+                <div class="action-text">Помощь соседям</div>
+            </div>
+            <div class="action-card" onclick="tg.showAlert('Магазин скидок!')">
+                <div class="action-icon icon-gift"><span class="material-symbols-rounded">redeem</span></div>
+                <div class="action-text">Тратить баллы</div>
+            </div>
+        </div>
+        <div class="section-title">Лента района <span>Все</span></div>
+        <div class="feed-card">
+            <div class="feed-icon" style="background:#e5f0ff; color:#007aff;"><span class="material-symbols-rounded">campaign</span></div>
+            <div class="feed-content">
+                <div class="feed-text"><b>Совет дома:</b> В эту субботу в 10:00 состоится субботник. Выходим чистить двор! За участие дадим по 100 баллов.</div>
+                <div class="feed-time">Сегодня, 09:41</div>
+            </div>
+        </div>
+    </div> 
+    <div id="map-screen" class="map-container">
+        <div id="yandex-map" style="width: 100%; height: 100%;"></div>
+        <div onclick="openMain()" class="back-btn">← Назад</div>
+        <div onclick="addMarkerAtCenter()" class="add-btn">
+            <span class="material-symbols-rounded">add_location_alt</span>
+        </div>
+    </div>
+    <div id="category-sheet" class="category-sheet">
+        <h3>Что вы хотите отметить?</h3>
+        <div class="category-grid">
+            <div class="category-item" onclick="selectCategory('repair')">
+                <span class="material-symbols-rounded cat-repair">build</span>
+                <span>Ремонт</span>
+            </div>
+            <div class="category-item" onclick="selectCategory('eco')">
+                <span class="material-symbols-rounded cat-eco">eco</span>
+                <span>Экология</span>
+            </div>
+            <div class="category-item" onclick="selectCategory('help')">
+                <span class="material-symbols-rounded cat-help">volunteer_activism</span>
+                <span>Помощь</span>
+            </div>
+            <div class="category-item" onclick="selectCategory('security')">
+                <span class="material-symbols-rounded cat-security">shield</span>
+                <span>Безопасность</span>
+            </div>
+        </div>
+        <div class="close-sheet" onclick="hideCategorySheet()">Отмена</div>
+    </div>
+    <div class="bottom-nav-wrapper">
+        <div class="bottom-nav">
+            <div class="nav-item active" id="nav-home" onclick="openMain()">
+                <span class="material-symbols-rounded">home</span> Главная
+            </div>
+            <div class="nav-item" id="nav-map" onclick="openMap()">
+                <span class="material-symbols-rounded">location_on</span> Карта
+            </div>
+            <div class="nav-item" onclick="tg.showAlert('Раздел чатов!')">
+                <span class="material-symbols-rounded">chat</span> Чаты
+            </div>
+            <div class="nav-item" onclick="tg.showAlert('Твой профиль!')">
+                <span class="material-symbols-rounded">person</span> Профиль
+            </div>
+        </div>
+    </div>
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+        tg.setHeaderColor('#f2f4f7');
+        let userName = tg.initDataUnsafe?.user?.first_name;
+        if (userName) {
+            document.getElementById('user-name').innerText = userName;
+            document.getElementById('user-avatar').innerText = userName.charAt(0).toUpperCase();
+        } else {
+            document.getElementById('user-name').innerText = "Гость";
+            document.getElementById('user-avatar').innerText = "Г";
+        }
+        document.getElementById('user-balance').innerText = "150";
+        let myMap;
+        let mapInitialized = false;
+        let tempCoords = null; 
+        function openMap() {
+            document.getElementById('main-screen').style.display = 'none';
+            document.getElementById('map-screen').style.display = 'block';
+            document.getElementById('nav-home').classList.remove('active');
+            document.getElementById('nav-map').classList.add('active');
+            if (!mapInitialized) {
+                ymaps.ready(function() {
+                    initMap();
+                    mapInitialized = true;
+                });
+            }
+        }
+        function openMain() {
+            document.getElementById('main-screen').style.display = 'block';
+            document.getElementById('map-screen').style.display = 'none';
+            document.getElementById('nav-map').classList.remove('active');
+            document.getElementById('nav-home').classList.add('active');
+        }
+        function initMap() {
+            myMap = new ymaps.Map("yandex-map", {
+                center: [55.751244, 37.618423],
+                zoom: 15,
+                controls: ['zoomControl']
+            });
+            addMarkerToMap([55.751, 37.618], 'repair', 'Сломанная лавочка', 'В работе');
+            addMarkerToMap([55.753, 37.621], 'eco', 'Фандомат', 'Сюда можно сдать пластик');
+            myMap.events.add('click', function (e) {
+                tempCoords = e.get('coords');
+                document.getElementById('category-sheet').classList.add('open');
+            });
+        }
+        function addMarkerAtCenter() {
+            if (!myMap) return;
+            tempCoords = myMap.getCenter();
+            document.getElementById('category-sheet').classList.add('open');
+        }
+        function hideCategorySheet() {
+            document.getElementById('category-sheet').classList.remove('open');
+            tempCoords = null;
+        }
+        function selectCategory(type) {
+            document.getElementById('category-sheet').classList.remove('open');
+            if (!tempCoords) return;
+            let title, desc;
+            if (type === 'repair') { title = 'Проблема (Ремонт)'; desc = 'Нужен ремонт.'; }
+            if (type === 'eco') { title = 'Экология'; desc = 'Вопрос по экологии.'; }
+            if (type === 'help') { title = 'Нужна помощь'; desc = 'Требуется помощь.'; }
+            if (type === 'security') { title = 'Безопасность'; desc = 'Вопрос безопасности.'; }
+            addMarkerToMap(tempCoords, type, title, desc);
+            tempCoords = null;
+        }
+        function addMarkerToMap(coords, type, title, desc) {
+            let color = 'red';
+            if (type === 'eco') color = 'green';
+            if (type === 'help') color = 'orange';
+            if (type === 'security') color = 'blue';
+            var placemark = new ymaps.Placemark(coords, {
+                hintContent: title,
+                balloonContent: desc
+            }, { 
+                preset: 'islands#' + color + 'Icon'
+            });
+            myMap.geoObjects.add(placemark);
+        }
+    </script>
+</body>
+</html>
