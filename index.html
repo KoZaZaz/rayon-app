@@ -6,6 +6,7 @@
     <title>RAYON - Мой район</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=b91b8274-1abf-4c6f-abe0-969e6d16b55e" type="text/javascript"></script>
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0');
         :root {
@@ -32,20 +33,23 @@
         .bg-blob-2 { top: 30%; right: -50px; width: 200px; height: 200px; background: #a18cd1; animation: float 8s infinite alternate-reverse; }
         .bg-blob-3 { bottom: 10%; left: 10%; width: 300px; height: 300px; background: #84fab0; animation: float 12s infinite alternate; }
         @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(20px, 20px) scale(1.1); } }
+        
         .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; background: var(--bg-glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); padding: 12px 16px; border-radius: 20px; border: 1px solid var(--border-glass); box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
         .user-info { display: flex; align-items: center; gap: 12px; }
         .avatar { width: 46px; height: 46px; background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; color: white; box-shadow: 0 4px 12px rgba(255, 117, 140, 0.4); }
         .greeting { font-size: 13px; color: var(--text-muted); font-weight: 500; }
-        .name { font-size: 18px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
+        .name { font-size: 18px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;}
         .bell-icon { background: white; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer; color: var(--text-main); }
+        
         .balance-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 24px; padding: 24px; color: white; margin-bottom: 24px; box-shadow: 0 12px 24px rgba(118, 75, 162, 0.3); position: relative; overflow: hidden; }
         .balance-card::before { content: ''; position: absolute; top: -50px; right: -30px; width: 150px; height: 150px; background: rgba(255,255,255,0.15); border-radius: 50%; }
         .balance-card::after { content: ''; position: absolute; bottom: -40px; left: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; }
         .balance-title { font-size: 14px; opacity: 0.9; font-weight: 500; display: flex; align-items: center; gap: 8px; }
-        .balance-amount { font-size: 40px; font-weight: 800; margin: 8px 0 16px 0; letter-spacing: -1px; display: flex; align-items: center; gap: 8px; }
+        .balance-amount { font-size: 40px; font-weight: 800; margin: 8px 0 16px 0; letter-spacing: -1px; display: flex; align-items: center; gap: 8px;}
         .level-info { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
         .progress-bar-bg { background: rgba(255,255,255,0.25); height: 10px; border-radius: 5px; overflow: hidden; }
         .progress-bar-fill { background: #fff; width: 65%; height: 100%; border-radius: 5px; }
+        
         .section-title { font-size: 20px; font-weight: 800; margin-bottom: 16px; margin-top: 28px; display: flex; justify-content: space-between; align-items: flex-end; }
         .section-title span { font-size: 14px; color: var(--accent); font-weight: 600; cursor: pointer; }
         .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -57,21 +61,26 @@
         .icon-help { background: #fff3cd; color: #ff9500; }
         .icon-gift { background: #e8f5e9; color: #34c759; }
         .action-text { font-weight: 700; font-size: 15px; }
+        
         .feed-card { background: var(--bg-glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--border-glass); border-radius: 20px; padding: 16px; margin-bottom: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.02); display: flex; gap: 14px; cursor: pointer; }
         .feed-icon { width: 44px; height: 44px; min-width: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
         .feed-content { flex-grow: 1; }
         .feed-text { font-size: 14px; line-height: 1.45; margin-bottom: 8px; color: #2c2c2e; }
         .feed-time { font-size: 12px; color: var(--text-muted); font-weight: 500; display: flex; align-items: center; gap: 8px; }
+        
         .bottom-nav-wrapper { position: fixed; bottom: 20px; left: 16px; right: 16px; z-index: 100; }
         .bottom-nav { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--border-glass); display: flex; justify-content: space-around; padding: 12px 8px; border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
         .nav-item { text-align: center; font-size: 11px; font-weight: 600; color: var(--text-muted); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: 0.2s; }
         .nav-item span.material-symbols-rounded { transition: 0.2s; opacity: 0.6; }
         .nav-item.active { color: var(--accent); }
         .nav-item.active span.material-symbols-rounded { transform: translateY(-2px) scale(1.1); opacity: 1; color: var(--accent); }
+        
         .map-container { display: none; height: 75vh; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.1); position: relative; }
         .back-btn { position: absolute; top: 16px; left: 16px; background: white; padding: 8px 16px; border-radius: 20px; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.2); cursor: pointer; z-index: 10; }
+        
         .add-btn { position: absolute; bottom: 16px; right: 16px; background: var(--accent); color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(88, 86, 214, 0.4); cursor: pointer; z-index: 10; transition: 0.2s; }
         .add-btn:active { transform: scale(0.9); }
+
         .category-sheet { position: fixed; bottom: -100%; left: 0; right: 0; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border-radius: 24px 24px 0 0; padding: 24px; box-shadow: 0 -10px 30px rgba(0,0,0,0.1); transition: bottom 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 200; }
         .category-sheet.open { bottom: 0; }
         .category-sheet h3 { margin: 0 0 16px 0; font-size: 18px; text-align: center; }
@@ -80,6 +89,7 @@
         .category-item:active { transform: scale(0.95); }
         .category-item .material-symbols-rounded { font-size: 32px; margin-bottom: 8px; }
         .category-item span:last-child { font-weight: 600; font-size: 13px; }
+        
         .cat-repair { color: #ff3b30; background: #ffebee; }
         .cat-eco { color: #34c759; background: #e8f5e9; }
         .cat-help { color: #ff9500; background: #fff3cd; }
@@ -88,9 +98,11 @@
     </style>
 </head>
 <body>
+
     <div class="bg-blob-1"></div>
     <div class="bg-blob-2"></div>
     <div class="bg-blob-3"></div>
+
     <div id="main-screen">
         <div class="top-header">
             <div class="user-info">
@@ -104,6 +116,7 @@
                 <span class="material-symbols-rounded" style="font-size: 22px;">notifications</span>
             </div>
         </div>
+
         <div class="balance-card">
             <div class="balance-title">
                 <span class="material-symbols-rounded" style="font-size: 18px;">auto_awesome</span>
@@ -118,6 +131,7 @@
                 <div class="progress-bar-fill"></div>
             </div>
         </div>
+
         <div class="section-title">Быстрые действия</div>
         <div class="actions-grid">
             <div class="action-card" onclick="openMap()">
@@ -137,7 +151,9 @@
                 <div class="action-text">Тратить баллы</div>
             </div>
         </div>
+
         <div class="section-title">Лента района <span>Все</span></div>
+        
         <div class="feed-card">
             <div class="feed-icon" style="background:#e5f0ff; color:#007aff;"><span class="material-symbols-rounded">campaign</span></div>
             <div class="feed-content">
@@ -146,13 +162,16 @@
             </div>
         </div>
     </div> 
+
     <div id="map-screen" class="map-container">
         <div id="yandex-map" style="width: 100%; height: 100%;"></div>
         <div onclick="openMain()" class="back-btn">← Назад</div>
+        
         <div onclick="addMarkerAtCenter()" class="add-btn">
             <span class="material-symbols-rounded">add_location_alt</span>
         </div>
     </div>
+
     <div id="category-sheet" class="category-sheet">
         <h3>Что вы хотите отметить?</h3>
         <div class="category-grid">
@@ -175,6 +194,7 @@
         </div>
         <div class="close-sheet" onclick="hideCategorySheet()">Отмена</div>
     </div>
+
     <div class="bottom-nav-wrapper">
         <div class="bottom-nav">
             <div class="nav-item active" id="nav-home" onclick="openMain()">
@@ -191,11 +211,13 @@
             </div>
         </div>
     </div>
+
     <script>
         let tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
         tg.setHeaderColor('#f2f4f7');
+
         let userName = tg.initDataUnsafe?.user?.first_name;
         if (userName) {
             document.getElementById('user-name').innerText = userName;
@@ -205,14 +227,17 @@
             document.getElementById('user-avatar').innerText = "Г";
         }
         document.getElementById('user-balance').innerText = "150";
+
         let myMap;
         let mapInitialized = false;
         let tempCoords = null; 
+
         function openMap() {
             document.getElementById('main-screen').style.display = 'none';
             document.getElementById('map-screen').style.display = 'block';
             document.getElementById('nav-home').classList.remove('active');
             document.getElementById('nav-map').classList.add('active');
+
             if (!mapInitialized) {
                 ymaps.ready(function() {
                     initMap();
@@ -220,57 +245,81 @@
                 });
             }
         }
+
         function openMain() {
             document.getElementById('main-screen').style.display = 'block';
             document.getElementById('map-screen').style.display = 'none';
             document.getElementById('nav-map').classList.remove('active');
             document.getElementById('nav-home').classList.add('active');
         }
+
         function initMap() {
             myMap = new ymaps.Map("yandex-map", {
                 center: [55.751244, 37.618423],
                 zoom: 15,
                 controls: ['zoomControl']
             });
+
+            // Стартовые метки
             addMarkerToMap([55.751, 37.618], 'repair', 'Сломанная лавочка', 'В работе');
             addMarkerToMap([55.753, 37.621], 'eco', 'Фандомат', 'Сюда можно сдать пластик');
+
+            // Клик по карте
             myMap.events.add('click', function (e) {
                 tempCoords = e.get('coords');
                 document.getElementById('category-sheet').classList.add('open');
             });
         }
+
         function addMarkerAtCenter() {
             if (!myMap) return;
             tempCoords = myMap.getCenter();
             document.getElementById('category-sheet').classList.add('open');
         }
+
         function hideCategorySheet() {
             document.getElementById('category-sheet').classList.remove('open');
             tempCoords = null;
         }
+
         function selectCategory(type) {
             document.getElementById('category-sheet').classList.remove('open');
+            
             if (!tempCoords) return;
+
             let title, desc;
             if (type === 'repair') { title = 'Проблема (Ремонт)'; desc = 'Нужен ремонт.'; }
             if (type === 'eco') { title = 'Экология'; desc = 'Вопрос по экологии.'; }
             if (type === 'help') { title = 'Нужна помощь'; desc = 'Требуется помощь.'; }
             if (type === 'security') { title = 'Безопасность'; desc = 'Вопрос безопасности.'; }
+
             addMarkerToMap(tempCoords, type, title, desc);
             tempCoords = null;
         }
+
+        // НОВАЯ ФУНКЦИЯ С ИСПОЛЬЗОВАНИЕМ НАШИХ SVG ИКОНОК
         function addMarkerToMap(coords, type, title, desc) {
-            let color = 'red';
-            if (type === 'eco') color = 'green';
-            if (type === 'help') color = 'orange';
-            if (type === 'security') color = 'blue';
+            // Базовый URL к нашим иконкам на GitHub
+            let baseUrl = 'https://kozazaz.github.io/rayon-app/icons/';
+            
+            // Выбираем иконку по типу
+            let iconUrl = baseUrl + 'repair.svg'; 
+            if (type === 'eco') iconUrl = baseUrl + 'eco.svg';
+            if (type === 'help') iconUrl = baseUrl + 'help.svg';
+            if (type === 'security') iconUrl = baseUrl + 'security.svg';
+
             var placemark = new ymaps.Placemark(coords, {
                 hintContent: title,
                 balloonContent: desc
             }, { 
-                preset: 'islands#' + color + 'Icon'
+                iconLayout: 'default#image',
+                iconImageHref: iconUrl,
+                iconImageSize: [48, 48],     // Размер иконки
+                iconImageOffset: [-24, -48]  // Сдвиг, чтобы острие указывало на точку
             });
-            myMap.geoObjects.add(placemark);
+            
+            myGeoObjects = myMap.geoObjects;
+            myGeoObjects.add(placemark);
         }
     </script>
 </body>
