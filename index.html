@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>RAYON - Мой район</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Твой API-ключ -->
     <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=b91b8274-1abf-4c6f-abe0-969e6d16b55e" type="text/javascript"></script>
     
     <style>
@@ -242,8 +241,11 @@
             document.getElementById('nav-map').classList.add('active');
 
             if (!mapInitialized) {
-                ymaps.ready(initMap);
-                mapInitialized = true;
+                // Ждем полной загрузки API карт
+                ymaps.ready(function() {
+                    initMap();
+                    mapInitialized = true;
+                });
             }
         }
 
@@ -261,19 +263,22 @@
                 controls: ['zoomControl']
             });
 
-            // Стартовые метки (со стандартными иконками Яндекса)
+            // Стартовые метки
             addMarkerToMap([55.751, 37.618], 'repair', 'Сломанная лавочка', 'В работе');
             addMarkerToMap([55.753, 37.621], 'eco', 'Фандомат', 'Сюда можно сдать пластик');
 
             // Клик по карте
             myMap.events.add('click', function (e) {
                 pendingCoords = e.get('coords');
-                showCategorySheet();
+                if (pendingCoords) {
+                    showCategorySheet();
+                }
             });
         }
 
         function showCategorySheet() {
             if (!pendingCoords) {
+                // Если нажали на кнопку "+", берем центр карты
                 pendingCoords = myMap.getCenter();
             }
             document.getElementById('category-sheet').classList.add('open');
@@ -281,12 +286,16 @@
 
         function hideCategorySheet() {
             document.getElementById('category-sheet').classList.remove('open');
-            pendingCoords = null;
+            // Не сбрасываем pendingCoords, чтобы успеть добавить метку
         }
 
         function selectCategory(type) {
-            hideCategorySheet();
-            if (!pendingCoords) return;
+            document.getElementById('category-sheet').classList.remove('open');
+            
+            if (!pendingCoords) {
+                alert("Ошибка: координаты не найдены");
+                return;
+            }
 
             let title, desc;
             if (type === 'repair') { title = 'Проблема (Ремонт)'; desc = 'Нужен ремонт.'; }
@@ -294,19 +303,15 @@
             if (type === 'help') { title = 'Нужна помощь'; desc = 'Требуется помощь соседей.'; }
             if (type === 'security') { title = 'Безопасность'; desc = 'Вопрос безопасности.'; }
 
+            // Добавляем метку
             addMarkerToMap(pendingCoords, type, title, desc);
             
-            tg.HapticFeedback.impactOccurred('medium');
-            tg.showAlert('📍 Метка добавлена!');
+            // Сбрасываем координаты
             pendingCoords = null;
         }
 
-        // НОВАЯ ФУНКЦИЯ: Используем встроенные стили Яндекса вместо картинок
         function addMarkerToMap(coords, type, title, desc) {
-            let presetStyle = 'islands#blueIcon'; // По умолчанию синяя
-
-            // Выбираем стандартные стили Яндекса в зависимости от категории
-            if (type === 'repair') presetStyle = 'islands#redIcon';
+            let presetStyle = 'islands#redIcon';
             if (type === 'eco') presetStyle = 'islands#greenIcon';
             if (type === 'help') presetStyle = 'islands#orangeIcon';
             if (type === 'security') presetStyle = 'islands#blueIcon';
@@ -315,8 +320,9 @@
                 hintContent: title,
                 balloonContent: desc
             }, { 
-                preset: presetStyle // Используем встроенную иконку
+                preset: presetStyle 
             });
+            
             myMap.geoObjects.add(placemark);
         }
     </script>
